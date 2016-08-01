@@ -15,22 +15,11 @@ type CPU struct {
 	instructionSet map[byte]instruction
 }
 
-type registers struct {
-	A byte
-	B byte
-	C byte
-	D byte
-	E byte
-	H byte
-	L byte
-	F byte
-}
-
 type instruction struct {
-	exec  func()
-	name  string
-	ticks uint64
-	m     uint64
+	Exec   func(cpu *CPU)
+	Name   string
+	Ticks  uint64
+	Length uint8
 }
 
 // New creates a new instance of Gameboy's CPU
@@ -43,7 +32,19 @@ func New(system *System) *CPU {
 	return cpu
 }
 
-// TODO create instruction set map.
+func nop(cpu *CPU) {
+	cpu.StackPointer += 2
+}
+
 func initializeInstructionset() map[byte]instruction {
-	return nil
+	instructionSet := make(map[byte]instruction)
+
+	instructionSet[0x0] = instruction{
+		Name:   "NOP",
+		Ticks:  4,
+		Length: 1,
+		Exec:   nop,
+	}
+
+	return instructionSet
 }

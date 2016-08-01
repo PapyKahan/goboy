@@ -1,0 +1,19 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "xs3mRv9txr0qWb1t/uyd1KV3ewA=",
+			"path": "github.com/go-gl/gl/v4.1-core/gl",
+			"revision": "cd1cf4a9b229045e8a41d5945fc597617e8bae4f",
+			"revisionTime": "2016-03-06T11:11:50Z"
+		},
+		{
+			"checksumSHA1": "tvzDDdeViFmc+C4ATjpZ7wZ2VM0=",
+			"path": "github.com/go-gl/glfw/v3.1/glfw",
+			"revision": "82775019c87191e4eebfb7d046d44e71a58ea21d",
+			"revisionTime": "2016-06-26T17:55:30Z"
+		}
+	],
+	"rootPath": "github.com/cfajardo/goboy"
+}

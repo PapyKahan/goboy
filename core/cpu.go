@@ -1,5 +1,7 @@
 package core
 
+import "fmt"
+
 func init() {
 
 }
@@ -16,19 +18,17 @@ type CPU struct {
 }
 
 type instruction struct {
-	Exec   func(cpu *CPU)
-	Name   string
-	Ticks  uint64
-	Length uint8
+	Execute func(cpu *CPU)
+	Name    string
+	Ticks   uint64
+	Length  uint8
 }
 
 // New creates a new instance of Gameboy's CPU
 func New(system *System) *CPU {
 	cpu := &CPU{}
-
 	cpu.system = system
-	cpu.instructionSet = initializeInstructionset()
-
+	cpu.initializeInstructionset()
 	return cpu
 }
 
@@ -36,15 +36,30 @@ func nop(cpu *CPU) {
 	cpu.StackPointer += 2
 }
 
-func initializeInstructionset() map[byte]instruction {
-	instructionSet := make(map[byte]instruction)
-
-	instructionSet[0x0] = instruction{
-		Name:   "NOP",
-		Ticks:  4,
-		Length: 1,
-		Exec:   nop,
+func (cpu *CPU) initializeInstructionset() error {
+	cpu.instructionSet = make(map[byte]instruction)
+	if cpu.instructionSet == nil {
+		return fmt.Errorf("Could not allocate memory for cpu.instructionSet")
 	}
 
-	return instructionSet
+	cpu.instructionSet[0x0] = instruction{Name: "NOP", Ticks: 4, Length: 1, Execute: nop}
+	return nil
+}
+
+// Execute execute next instruction
+func (cpu *CPU) Execute() error {
+	cpu.ProgramCounter++
+	opcode := cpu.system.mmu.readByte(cpu.ProgramCounter)
+
+	inst := cpu.instructionSet[byte(opcode&0xFF>>8)]
+
+	switch inst.Length {
+	case 0:
+		inst.Execute(cpu)
+	case 1:
+		inst.Execute(cpu)
+	case 2:
+	}
+
+	return nil
 }

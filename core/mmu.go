@@ -4,11 +4,11 @@ package core
 type MMU struct {
 }
 
-func (mmu *MMU) readByte() byte {
+func (mmu *MMU) readByte(address uint16) byte {
 	return 0
 }
 
-func readWord() uint16 {
+func (mmu *MMU) readWord(address uint16) uint16 {
 	return 0
 }
 

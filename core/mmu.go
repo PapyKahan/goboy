@@ -12,10 +12,10 @@ func (mmu *MMU) readWord(address uint16) uint16 {
 	return 0
 }
 
-func writeByte(value byte, address uint16) {
+func (mmu *MMU) writeByte(address uint16, value byte) {
 
 }
 
-func writeWord(value uint16, address uint16) {
+func (mmu *MMU) writeWord(address uint16, value uint16) {
 
 }

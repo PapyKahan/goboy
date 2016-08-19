@@ -1,31 +1,31 @@
 package core
 
 type instruction struct {
-	Cpu     *CPU
+	cpu     *cpu
 	handler handlerFunc
-	Name    string
-	Ticks   uint64
-	Length  uint8
+	name    string
+	ticks   uint64
+	length  uint8
 }
 
 func (inst *instruction) execute() {
-	inst.handler.handle(inst.Cpu, inst.Length)
-	inst.Cpu.ticks += inst.Ticks
+	inst.handler.handle(inst.cpu, inst.length)
+	inst.cpu.ticks += inst.ticks
 }
 
-type handlerFunc func(cpu *CPU, parameters uint16)
+type handlerFunc func(cpu *cpu, parameters uint16)
 
-func (f handlerFunc) handle(cpu *CPU, instructionLength byte) {
+func (f handlerFunc) handle(cpu *cpu, instructionLength byte) {
 	var parameters uint16
 
-	switch instructionLength - 1 {
-	case 0:
-		parameters = 0
+	switch instructionLength {
 	case 1:
-		parameters = uint16(cpu.system.mmu.readByte(cpu.ProgramCounter))
-
+		parameters = 0
 	case 2:
-		parameters = cpu.system.mmu.readWord(cpu.ProgramCounter)
+		parameters = uint16(cpu.mmu.readByte(cpu.ProgramCounter))
+
+	case 3:
+		parameters = cpu.mmu.readWord(cpu.ProgramCounter)
 	}
 	f(cpu, parameters)
 	cpu.ProgramCounter += uint16(instructionLength - 1)

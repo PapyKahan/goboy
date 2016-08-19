@@ -20,9 +20,10 @@ func (f handlerFunc) handle(cpu *CPU, instructionLength byte) {
 
 	switch instructionLength - 1 {
 	case 0:
-		f(cpu, 0)
+		parameters = 0
 	case 1:
 		parameters = uint16(cpu.system.mmu.readByte(cpu.ProgramCounter))
+
 	case 2:
 		parameters = cpu.system.mmu.readWord(cpu.ProgramCounter)
 	}

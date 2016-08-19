@@ -1,24 +1,20 @@
 package core
 
-import (
-	"fmt"
-)
-
 // var instructionSet = map[int]instruction {
 // 	instruction{cpu: nil, Name: "NOP", Ticks: 4, Length: 1, handler: handlerFunc(nop)}
 // }
 
 // nn = int16
 // n = int8
-var instructionSetDeclaration = map[int]instruction{
-	0x00: instruction{Name: "NOP", Ticks: 4, Length: 1, handler: handlerFunc(nop)},
-	0x01: instruction{Name: "LD BC nn", Ticks: 12, Length: 3, handler: handlerFunc(ldBcNn)},
-	0x02: instruction{Name: "LD (BC) A", Ticks: 8, Length: 1, handler: handlerFunc(ldBcpA)},
-	0x03: instruction{Name: "INC BC", Ticks: 8, Length: 1, handler: handlerFunc(incBc)},
-	0x04: instruction{Name: "INC B", Ticks: 4, Length: 1, handler: handlerFunc(incB)},
-	0x05: instruction{Name: "DEC B", Ticks: 4, Length: 1, handler: handlerFunc(decB)},
-	0x06: instruction{Name: "LD B n", Ticks: 8, Length: 2, handler: handlerFunc(ldBn)},
-	0x07: instruction{Name: "RLCA", Ticks: 4, Length: 1, handler: handlerFunc(rlca)},
+var instructionSetDeclaration = map[int]*instruction{
+	0x00: &instruction{Name: "NOP", Ticks: 4, Length: 1, handler: handlerFunc(nop)},
+	0x01: &instruction{Name: "LD BC nn", Ticks: 12, Length: 3, handler: handlerFunc(ldBcNn)},
+	0x02: &instruction{Name: "LD (BC) A", Ticks: 8, Length: 1, handler: handlerFunc(ldBcpA)},
+	0x03: &instruction{Name: "INC BC", Ticks: 8, Length: 1, handler: handlerFunc(incBc)},
+	0x04: &instruction{Name: "INC B", Ticks: 4, Length: 1, handler: handlerFunc(incB)},
+	0x05: &instruction{Name: "DEC B", Ticks: 4, Length: 1, handler: handlerFunc(decB)},
+	0x06: &instruction{Name: "LD B n", Ticks: 8, Length: 2, handler: handlerFunc(ldBn)},
+	0x07: &instruction{Name: "RLCA", Ticks: 4, Length: 1, handler: handlerFunc(rlca)},
 }
 
 // CPU GameBoy cpu
@@ -28,7 +24,7 @@ type CPU struct {
 	ProgramCounter uint16
 	StackPointer   uint16
 	ticks          uint64
-	instructionSet *map[int]instruction
+	instructionSet *map[int]*instruction
 }
 
 func (cpu *CPU) initialize(system *System) {
@@ -38,13 +34,8 @@ func (cpu *CPU) initialize(system *System) {
 
 func (cpu *CPU) initializeInstructionset() error {
 	cpu.instructionSet = &instructionSetDeclaration
-	for index, instruction := range *cpu.instructionSet {
-		fmt.Println("###############################")
+	for _, instruction := range *cpu.instructionSet {
 		instruction.Cpu = cpu
-		fmt.Printf("instruction %s\r\n", instruction)
-		fmt.Println("###############################")
-		fmt.Printf("instruction set %s\r\n", instructionSetDeclaration[index])
-		fmt.Println("###############################")
 	}
 	return nil
 }

@@ -7,7 +7,7 @@ func TestNop(t *testing.T) {
 	system.cpu.ProgramCounter = 0
 	instruction := (*system.cpu.instructionSet)[0x0]
 	instruction.execute()
-	if system.cpu.ProgramCounter != 1 {
+	if system.cpu.ProgramCounter != 2 {
 		t.Fail()
 	}
 }

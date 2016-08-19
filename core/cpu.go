@@ -28,6 +28,9 @@ type cpu struct {
 
 func (cpu *cpu) initialize() {
 	cpu.initializeInstructionset()
+	cpu.mmu = &mmu{}
+	cpu.gpu = &gpu{}
+	cpu.spu = &spu{}
 }
 
 func (cpu *cpu) initializeInstructionset() error {

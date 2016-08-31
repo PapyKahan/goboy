@@ -19,16 +19,34 @@ var bootStrap = [0x100]byte{
 	0xF5, 0x06, 0x19, 0x78, 0x86, 0x23, 0x05, 0x20, 0xFB, 0x86, 0x20, 0xFE, 0x3E, 0x01, 0xE0, 0x50,
 }
 
+// General Memory Map
+//	0000-3FFF   16KB ROM Bank 00     (in cartridge, fixed at bank 00)
+//	4000-7FFF   16KB ROM Bank 01..NN (in cartridge, switchable bank number)
+//	8000-9FFF   8KB Video RAM (VRAM) (switchable bank 0-1 in CGB Mode)
+//	A000-BFFF   8KB External RAM     (in cartridge, switchable bank, if any)
+//	C000-CFFF   4KB Work RAM Bank 0 (WRAM)
+//	D000-DFFF   4KB Work RAM Bank 1 (WRAM)  (switchable bank 1-7 in CGB Mode)
+//	E000-FDFF   Same as C000-DDFF (ECHO)    (typically not used)
+//	FE00-FE9F   Sprite Attribute Table (OAM)
+//	FEA0-FEFF   Not Usable
+//	FF00-FF7F   I/O Ports
+//	FF80-FFFE   High RAM (HRAM)
+//	FFFF        Interrupt Enable Register
+
 type mmu struct {
 	memory [0xFFFF]byte
 
-	cartidge [0x8000]byte
-	sram     [0x2000]byte
-	io       [0x100]byte
-	vram     [0x2000]byte
-	oam      [0x100]byte
-	wram     [0x2000]byte
-	hram     [0x80]byte
+	// cartidge [0x8000]byte
+	// sram     [0x2000]byte
+	// io       [0x100]byte
+	// vram     [0x2000]byte
+	// oam      [0x100]byte
+	// wram     [0x2000]byte
+	// hram     [0x80]byte
+}
+
+func (mmu *mmu) initialize() {
+
 }
 
 func (mmu *mmu) readByte(address uint16) byte {
@@ -45,5 +63,5 @@ func (mmu *mmu) writeByte(address uint16, value byte) {
 
 func (mmu *mmu) writeWord(address uint16, value uint16) {
 	mmu.memory[address] = uint8(value >> 8)
-	mmu.memory[address] = uint8(value & 0x00FF)
+	mmu.memory[address+1] = uint8(value & 0x00FF)
 }

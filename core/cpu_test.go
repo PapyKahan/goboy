@@ -10,7 +10,7 @@ func TestNop(t *testing.T) {
 
 	instruction := (*system.cpu.instructionSet)[0x0]
 	if system.cpu.ProgramCounter != uint16(instruction.length) {
-		t.Logf("system.cpu.ProgramCounter = %d, expected = 1", system.cpu.ProgramCounter)
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.ProgramCounter, instruction.length)
 		t.Fail()
 	}
 }
@@ -26,7 +26,7 @@ func TestLdBcNn(t *testing.T) {
 	system.Execute()
 	instruction := (*system.cpu.instructionSet)[0x1]
 	if system.cpu.ProgramCounter != uint16(instruction.length) {
-		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.ProgramCounter, 3)
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.ProgramCounter, instruction.length)
 		t.Fail()
 	}
 

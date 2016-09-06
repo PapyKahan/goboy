@@ -75,7 +75,7 @@ func decB(cpu *cpu, _ uint16) {
 }
 
 func ldBn(cpu *cpu, parameter uint16) {
-	cpu.registers.B = uint8(parameter & 0x00FF >> 8)
+	cpu.registers.B = uint8(parameter & 0x00FF)
 }
 
 func rlca(cpu *cpu, _ uint16) {

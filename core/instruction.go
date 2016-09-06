@@ -1,5 +1,7 @@
 package core
 
+import "fmt"
+
 type instruction struct {
 	cpu     *cpu
 	handler handlerFunc
@@ -28,5 +30,8 @@ func (f handlerFunc) handle(cpu *cpu, instructionLength byte) {
 		parameters = cpu.mmu.readWord(cpu.ProgramCounter)
 	}
 	f(cpu, parameters)
+	fmt.Printf("cpu.ProgramCounter = %d\r\n", cpu.ProgramCounter)
+	fmt.Printf("instructionLength = %d\r\n", instructionLength)
 	cpu.ProgramCounter += uint16(instructionLength - 1)
+	fmt.Printf("cpu.ProgramCounter = %d\r\n", cpu.ProgramCounter)
 }

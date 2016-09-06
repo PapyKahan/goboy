@@ -33,6 +33,18 @@ var bootStrap = [0x100]byte{
 //	FF80-FFFE   High RAM (HRAM)
 //	FFFF        Interrupt Enable Register
 
+const romBank00BaseAddress uint16 = 0x0000
+const romBank01BaseAddress uint16 = 0x4000
+const videoRAMBaseAddress uint16 = 0x8000
+const externalRAMBaseAddress uint16 = 0xA000
+const workRAMBank0BaseAddress uint16 = 0xC000
+const workRAMBank1BaseAddress uint16 = 0xD000
+const echoBaseAddress uint16 = 0xE000
+const spriteAttributeTableBaseAddress uint16 = 0xFE00
+const notUsableBaseAddress uint16 = 0xFEA0
+const highRAMBaseAddress uint16 = 0xFF80
+const interuptEnableRegisterBaseAddress = 0xFFFF
+
 type mmu struct {
 	memory [0xFFFF]byte
 

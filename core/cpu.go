@@ -44,7 +44,7 @@ func (cpu *cpu) initializeInstructionset() error {
 func (cpu *cpu) next() error {
 	opcode := cpu.mmu.readByte(cpu.ProgramCounter)
 	cpu.ProgramCounter++
-	inst := (*cpu.instructionSet)[int(opcode&0xFF>>8)]
+	inst := (*cpu.instructionSet)[int(opcode)]
 	inst.execute()
 	return nil
 }

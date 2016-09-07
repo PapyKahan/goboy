@@ -11,6 +11,8 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x05: &instruction{name: "DEC B", ticks: 4, length: 1, handler: handlerFunc(decB)},
 	0x06: &instruction{name: "LD B n", ticks: 8, length: 2, handler: handlerFunc(ldBn)},
 	0x07: &instruction{name: "RLCA", ticks: 4, length: 1, handler: handlerFunc(rlca)},
+	0x08: &instruction{name: "LD (nn) SP", ticks: 20, length: 3, handler: handlerFunc(ldNnpSp)},
+	0x09: &instruction{name: "ADD HL BC", ticks: 20, length: 3, handler: handlerFunc(addHlBc)},
 }
 
 type cpu struct {
@@ -49,6 +51,75 @@ func (cpu *cpu) next() error {
 	return nil
 }
 
+func (cpu *cpu) aluRotateLeftCarry(value byte) byte {
+	carry := (value & 0x80) >> 7
+	value <<= 1
+	if (cpu.registers.F & carryFlag) == carryFlag {
+		value++
+	}
+
+	if carry == 1 {
+		cpu.registers.F |= carryFlag
+	} else {
+		cpu.registers.F ^= carryFlag
+	}
+
+	cpu.registers.F ^= negativeFlag | zeroFlag | halfCarryFlag
+
+	return value
+}
+
+func (cpu *cpu) aluInc(value byte) byte {
+	if value&0x0F == 0 {
+		cpu.registers.F |= halfCarryFlag
+	} else {
+		cpu.registers.F ^= halfCarryFlag
+	}
+
+	value++
+
+	if value == 0 {
+		cpu.registers.F |= zeroFlag
+	} else {
+		cpu.registers.F ^= zeroFlag
+	}
+
+	cpu.registers.F ^= negativeFlag
+
+	return value
+}
+
+func (cpu *cpu) aluDec(value byte) byte {
+	if value&0x0F == 0x0 {
+		cpu.registers.F ^= halfCarryFlag
+	} else {
+		cpu.registers.F |= halfCarryFlag
+	}
+
+	value--
+
+	if value == 0 {
+		cpu.registers.F |= zeroFlag
+	} else {
+		cpu.registers.F ^= zeroFlag
+	}
+
+	cpu.registers.F |= negativeFlag
+
+	return value
+}
+
+func (cpu *cpu) add(a uint16, b uint16) uint16 {
+	value := a + b
+
+	// TODO handle carryFlag and halfCarryFlag
+
+	cpu.registers.F ^= negativeFlag
+	return value
+}
+
+// Instructions implementation :
+
 func nop(cpu *cpu, _ uint16) {
 }
 
@@ -67,11 +138,11 @@ func incBc(cpu *cpu, _ uint16) {
 }
 
 func incB(cpu *cpu, _ uint16) {
-	cpu.registers.B = cpu.registers.aluInc(cpu.registers.B)
+	cpu.registers.B = cpu.aluInc(cpu.registers.B)
 }
 
 func decB(cpu *cpu, _ uint16) {
-	cpu.registers.B = cpu.registers.aluDec(cpu.registers.B)
+	cpu.registers.B = cpu.aluDec(cpu.registers.B)
 }
 
 func ldBn(cpu *cpu, parameter uint16) {
@@ -79,15 +150,15 @@ func ldBn(cpu *cpu, parameter uint16) {
 }
 
 func rlca(cpu *cpu, _ uint16) {
-	carry := (cpu.registers.A & 0x80) >> 7
-	if carry == 1 {
-		cpu.registers.F |= carryFlag
-	} else {
-		cpu.registers.F ^= carryFlag
-	}
+	cpu.registers.A = cpu.aluRotateLeftCarry(cpu.registers.A)
+}
 
-	cpu.registers.A <<= 1
-	cpu.registers.A += carry
+func ldNnpSp(cpu *cpu, value uint16) {
+	cpu.mmu.writeWord(value, cpu.StackPointer)
+}
 
-	cpu.registers.F ^= negativeFlag | zeroFlag | halfCarryFlag
+func addHlBc(cpu *cpu, _ uint16) {
+	hl := cpu.registers.readHL()
+	bc := cpu.registers.readBC()
+	cpu.registers.writeHL(cpu.add(hl, bc))
 }

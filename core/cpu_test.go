@@ -30,12 +30,12 @@ func TestLdBcNn(t *testing.T) {
 	}
 
 	if system.cpu.registers.B != 0xFF {
-		t.Logf("system.cpu.registers.B = %d, expected = %d", system.cpu.registers.B, 0xFF)
+		t.Logf("system.cpu.registers.B = %X, expected = %X", system.cpu.registers.B, 0xFF)
 		t.Fail()
 	}
 
 	if system.cpu.registers.C != 0x0F {
-		t.Logf("system.cpu.registers.C = %d, expected = %d", system.cpu.registers.C, 0x0F)
+		t.Logf("system.cpu.registers.C = %X, expected = %X", system.cpu.registers.C, 0x0F)
 		t.Fail()
 	}
 }
@@ -57,7 +57,7 @@ func TestLdBcpA(t *testing.T) {
 
 	value := system.cpu.mmu.readByte(workRAMBank0BaseAddress)
 	if value != 0xF0 {
-		t.Logf("system.cpu.mmu.memory[0xC000] = %d, expected = %d", value, 0xF0)
+		t.Logf("system.cpu.mmu.memory[0xC000] = %X, expected = %X", value, 0xF0)
 		t.Fail()
 	}
 }
@@ -75,12 +75,12 @@ func TestIncBc(t *testing.T) {
 	}
 
 	if system.cpu.registers.B != 0x01 {
-		t.Logf("system.cpu.registers.B = %d, expected = %d", system.cpu.registers.B, 0x01)
+		t.Logf("system.cpu.registers.B = %X, expected = %X", system.cpu.registers.B, 0x01)
 		t.Fail()
 	}
 
 	if system.cpu.registers.C != 0x02 {
-		t.Logf("system.cpu.registers.C = %d, expected = %d", system.cpu.registers.C, 0x02)
+		t.Logf("system.cpu.registers.C = %X, expected = %X", system.cpu.registers.C, 0x02)
 		t.Fail()
 	}
 }
@@ -98,9 +98,11 @@ func TestIncB(t *testing.T) {
 	}
 
 	if system.cpu.registers.B != 0x02 {
-		t.Logf("system.cpu.registers.B = %d, expected = %d", system.cpu.registers.B, 0x02)
+		t.Logf("system.cpu.registers.B = %X, expected = %X", system.cpu.registers.B, 0x02)
 		t.Fail()
 	}
+
+	//TODO test affected flags
 }
 
 func TestDecB(t *testing.T) {
@@ -116,9 +118,11 @@ func TestDecB(t *testing.T) {
 	}
 
 	if system.cpu.registers.B != 0x00 {
-		t.Logf("system.cpu.registers.B = %d, expected = %d", system.cpu.registers.B, 0x00)
+		t.Logf("system.cpu.registers.B = %X, expected = %X", system.cpu.registers.B, 0x00)
 		t.Fail()
 	}
+
+	//TODO test affected flags
 }
 
 func TestLdBn(t *testing.T) {
@@ -135,14 +139,15 @@ func TestLdBn(t *testing.T) {
 	}
 
 	if system.cpu.registers.B != 0x06 {
-		t.Logf("system.cpu.registers.B = %d, expected = %d", system.cpu.registers.B, 0x06)
+		t.Logf("system.cpu.registers.B = %X, expected = %X", system.cpu.registers.B, 0x06)
 		t.Fail()
 	}
 }
 
 func TestRlca(t *testing.T) {
 	system := New()
-	system.cpu.registers.A = 0x00
+	system.cpu.registers.F |= negativeFlag | zeroFlag | halfCarryFlag
+	system.cpu.registers.A = 0x81
 	system.cpu.ProgramCounter = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x7)
 	system.Execute()
@@ -152,9 +157,68 @@ func TestRlca(t *testing.T) {
 		t.Fail()
 	}
 
-	// TODO write more accurate tests.
-	if system.cpu.registers.A != 0x00 {
-		t.Logf("system.cpu.registers.B = %d, expected = %d", system.cpu.registers.A, 0x00)
+	if system.cpu.registers.A != 0x02 {
+		t.Logf("system.cpu.registers.B = %X, expected = %X", system.cpu.registers.A, 0x02)
 		t.Fail()
 	}
+
+	if (system.cpu.registers.F & carryFlag) != carryFlag {
+		t.Logf("system.cpu.registers.F = %X, expected = %X", system.cpu.registers.F, carryFlag)
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & negativeFlag) == negativeFlag {
+		t.Logf("Negative flag must be reseted")
+	}
+
+	if (system.cpu.registers.F & zeroFlag) == zeroFlag {
+		t.Logf("Zero flag must be reseted")
+	}
+
+	if (system.cpu.registers.F & halfCarryFlag) == halfCarryFlag {
+		t.Logf("Half carry flag must be reseted")
+	}
+}
+
+func TestLdNnpSp(t *testing.T) {
+	system := New()
+	system.cpu.StackPointer = 0xF0FF
+	system.cpu.ProgramCounter = romBank00BaseAddress
+	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x8)
+	system.cpu.mmu.writeWord(romBank00BaseAddress+1, workRAMBank0BaseAddress)
+	system.Execute()
+	instruction := (*system.cpu.instructionSet)[0x8]
+	if system.cpu.ProgramCounter != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.ProgramCounter, instruction.length)
+		t.Fail()
+	}
+
+	value := system.cpu.mmu.readWord(workRAMBank0BaseAddress)
+	if value != 0xF0FF {
+		t.Logf("(%X) address value = %X, expected = %X", workRAMBank0BaseAddress, value, 0xF0FF)
+		t.Fail()
+	}
+}
+
+func TestAddHlBc(t *testing.T) {
+	system := New()
+	system.cpu.ProgramCounter = romBank00BaseAddress
+	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x9)
+
+	system.cpu.registers.writeBC(25)
+	system.cpu.registers.writeHL(48)
+	system.Execute()
+	instruction := (*system.cpu.instructionSet)[0x9]
+	if system.cpu.ProgramCounter != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.ProgramCounter, instruction.length)
+		t.Fail()
+	}
+
+	value := system.cpu.registers.readHL()
+	if value != 73 {
+		t.Logf("HL register value = %d, expected = %d", value, 73)
+		t.Fail()
+	}
+
+	// TODO test carry, half carry, zero, negative flags
 }

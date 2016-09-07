@@ -29,42 +29,11 @@ func (registers *registers) writeBC(value uint16) {
 	registers.C = byte(value & 0x00FF)
 }
 
-func (registers *registers) aluInc(value byte) byte {
-	if value&0x0F == 0 {
-		registers.F |= halfCarryFlag
-	} else {
-		registers.F ^= halfCarryFlag
-	}
-
-	value++
-
-	if value == 0 {
-		registers.F |= zeroFlag
-	} else {
-		registers.F ^= zeroFlag
-	}
-
-	registers.F ^= negativeFlag
-
-	return value
+func (registers *registers) readHL() uint16 {
+	return uint16(registers.H)<<8 + uint16(registers.L)
 }
 
-func (registers *registers) aluDec(value byte) byte {
-	if value&0x0F == 0 {
-		registers.F ^= halfCarryFlag
-	} else {
-		registers.F |= halfCarryFlag
-	}
-
-	value--
-
-	if value == 0 {
-		registers.F |= zeroFlag
-	} else {
-		registers.F ^= zeroFlag
-	}
-
-	registers.F |= negativeFlag
-
-	return value
+func (registers *registers) writeHL(value uint16) {
+	registers.H = byte(value >> 8)
+	registers.L = byte(value & 0x00FF)
 }

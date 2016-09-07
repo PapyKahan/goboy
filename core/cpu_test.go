@@ -4,13 +4,13 @@ import "testing"
 
 func TestNop(t *testing.T) {
 	system := New()
-	system.cpu.ProgramCounter = romBank00BaseAddress
+	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x0)
 	system.Execute()
 
 	instruction := (*system.cpu.instructionSet)[0x0]
-	if system.cpu.ProgramCounter != uint16(instruction.length) {
-		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.ProgramCounter, instruction.length)
+	if system.cpu.registers.pc != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
 		t.Fail()
 	}
 }
@@ -18,14 +18,14 @@ func TestNop(t *testing.T) {
 func TestLdBcNn(t *testing.T) {
 	system := New()
 	system.cpu.registers.writeBC(0x0)
-	system.cpu.ProgramCounter = romBank00BaseAddress
+	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x1)
 	system.cpu.mmu.writeWord(romBank00BaseAddress+1, 0xFF0F)
 
 	system.Execute()
 	instruction := (*system.cpu.instructionSet)[0x1]
-	if system.cpu.ProgramCounter != uint16(instruction.length) {
-		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.ProgramCounter, instruction.length)
+	if system.cpu.registers.pc != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
 		t.Fail()
 	}
 
@@ -45,13 +45,13 @@ func TestLdBcpA(t *testing.T) {
 	system.cpu.registers.A = 0xF0
 	system.cpu.registers.writeBC(workRAMBank0BaseAddress)
 	system.cpu.mmu.writeByte(workRAMBank0BaseAddress, 0xF0)
-	system.cpu.ProgramCounter = romBank00BaseAddress
+	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x2)
 	system.Execute()
 
 	instruction := (*system.cpu.instructionSet)[0x2]
-	if system.cpu.ProgramCounter != uint16(instruction.length) {
-		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.ProgramCounter, instruction.length)
+	if system.cpu.registers.pc != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
 		t.Fail()
 	}
 
@@ -65,12 +65,12 @@ func TestLdBcpA(t *testing.T) {
 func TestIncBc(t *testing.T) {
 	system := New()
 	system.cpu.registers.writeBC(0x0101)
-	system.cpu.ProgramCounter = romBank00BaseAddress
+	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x3)
 	system.Execute()
 	instruction := (*system.cpu.instructionSet)[0x3]
-	if system.cpu.ProgramCounter != uint16(instruction.length) {
-		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.ProgramCounter, instruction.length)
+	if system.cpu.registers.pc != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
 		t.Fail()
 	}
 
@@ -88,12 +88,12 @@ func TestIncBc(t *testing.T) {
 func TestIncB(t *testing.T) {
 	system := New()
 	system.cpu.registers.B = 0x01
-	system.cpu.ProgramCounter = romBank00BaseAddress
+	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x4)
 	system.Execute()
 	instruction := (*system.cpu.instructionSet)[0x4]
-	if system.cpu.ProgramCounter != uint16(instruction.length) {
-		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.ProgramCounter, instruction.length)
+	if system.cpu.registers.pc != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
 		t.Fail()
 	}
 
@@ -108,12 +108,12 @@ func TestIncB(t *testing.T) {
 func TestDecB(t *testing.T) {
 	system := New()
 	system.cpu.registers.B = 0x01
-	system.cpu.ProgramCounter = romBank00BaseAddress
+	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x5)
 	system.Execute()
 	instruction := (*system.cpu.instructionSet)[0x5]
-	if system.cpu.ProgramCounter != uint16(instruction.length) {
-		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.ProgramCounter, instruction.length)
+	if system.cpu.registers.pc != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
 		t.Fail()
 	}
 
@@ -128,13 +128,13 @@ func TestDecB(t *testing.T) {
 func TestLdBn(t *testing.T) {
 	system := New()
 	system.cpu.registers.B = 0x00
-	system.cpu.ProgramCounter = romBank00BaseAddress
+	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x6)
 	system.cpu.mmu.writeByte(romBank00BaseAddress+1, 0x6)
 	system.Execute()
 	instruction := (*system.cpu.instructionSet)[0x6]
-	if system.cpu.ProgramCounter != uint16(instruction.length) {
-		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.ProgramCounter, instruction.length)
+	if system.cpu.registers.pc != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
 		t.Fail()
 	}
 
@@ -148,12 +148,12 @@ func TestRlca(t *testing.T) {
 	system := New()
 	system.cpu.registers.F |= negativeFlag | zeroFlag | halfCarryFlag
 	system.cpu.registers.A = 0x81
-	system.cpu.ProgramCounter = romBank00BaseAddress
+	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x7)
 	system.Execute()
 	instruction := (*system.cpu.instructionSet)[0x7]
-	if system.cpu.ProgramCounter != uint16(instruction.length) {
-		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.ProgramCounter, instruction.length)
+	if system.cpu.registers.pc != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
 		t.Fail()
 	}
 
@@ -182,14 +182,14 @@ func TestRlca(t *testing.T) {
 
 func TestLdNnpSp(t *testing.T) {
 	system := New()
-	system.cpu.StackPointer = 0xF0FF
-	system.cpu.ProgramCounter = romBank00BaseAddress
+	system.cpu.registers.sp = 0xF0FF
+	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x8)
 	system.cpu.mmu.writeWord(romBank00BaseAddress+1, workRAMBank0BaseAddress)
 	system.Execute()
 	instruction := (*system.cpu.instructionSet)[0x8]
-	if system.cpu.ProgramCounter != uint16(instruction.length) {
-		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.ProgramCounter, instruction.length)
+	if system.cpu.registers.pc != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
 		t.Fail()
 	}
 
@@ -202,15 +202,15 @@ func TestLdNnpSp(t *testing.T) {
 
 func TestAddHlBc(t *testing.T) {
 	system := New()
-	system.cpu.ProgramCounter = romBank00BaseAddress
+	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x9)
 
 	system.cpu.registers.writeBC(25)
 	system.cpu.registers.writeHL(48)
 	system.Execute()
 	instruction := (*system.cpu.instructionSet)[0x9]
-	if system.cpu.ProgramCounter != uint16(instruction.length) {
-		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.ProgramCounter, instruction.length)
+	if system.cpu.registers.pc != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
 		t.Fail()
 	}
 

@@ -18,6 +18,9 @@ type registers struct {
 	H byte
 	L byte
 	F flags
+
+	pc uint16
+	sp uint16
 }
 
 func (registers *registers) readBC() uint16 {

@@ -17,8 +17,6 @@ var instructionSetDeclaration = map[int]*instruction{
 
 type cpu struct {
 	registers      registers
-	ProgramCounter uint16
-	StackPointer   uint16
 	ticks          uint64
 	instructionSet *map[int]*instruction
 
@@ -44,8 +42,8 @@ func (cpu *cpu) initializeInstructionset() error {
 }
 
 func (cpu *cpu) next() error {
-	opcode := cpu.mmu.readByte(cpu.ProgramCounter)
-	cpu.ProgramCounter++
+	opcode := cpu.mmu.readByte(cpu.registers.pc)
+	cpu.registers.pc++
 	inst := (*cpu.instructionSet)[int(opcode)]
 	inst.execute()
 	return nil
@@ -154,7 +152,7 @@ func rlca(cpu *cpu, _ uint16) {
 }
 
 func ldNnpSp(cpu *cpu, value uint16) {
-	cpu.mmu.writeWord(value, cpu.StackPointer)
+	cpu.mmu.writeWord(value, cpu.registers.sp)
 }
 
 func addHlBc(cpu *cpu, _ uint16) {

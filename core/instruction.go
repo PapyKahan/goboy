@@ -22,11 +22,11 @@ func (f handlerFunc) handle(cpu *cpu, instructionLength byte) {
 	case 1:
 		parameters = 0
 	case 2:
-		parameters = uint16(cpu.mmu.readByte(cpu.ProgramCounter))
+		parameters = uint16(cpu.mmu.readByte(cpu.registers.pc))
 
 	case 3:
-		parameters = cpu.mmu.readWord(cpu.ProgramCounter)
+		parameters = cpu.mmu.readWord(cpu.registers.pc)
 	}
 	f(cpu, parameters)
-	cpu.ProgramCounter += uint16(instructionLength - 1)
+	cpu.registers.pc += uint16(instructionLength - 1)
 }

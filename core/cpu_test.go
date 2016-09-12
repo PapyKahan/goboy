@@ -205,8 +205,12 @@ func TestAddHlBc(t *testing.T) {
 	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x9)
 
-	system.cpu.registers.writeBC(25)
-	system.cpu.registers.writeHL(48)
+	system.cpu.registers.F = negativeFlag | zeroFlag
+
+	//   0100 0100 0000 0000
+	// + 1100 1100 0000 0000
+	system.cpu.registers.writeBC(0x4400)
+	system.cpu.registers.writeHL(0xCC00)
 	system.Execute()
 	instruction := (*system.cpu.instructionSet)[0x9]
 	if system.cpu.registers.pc != uint16(instruction.length) {
@@ -215,10 +219,30 @@ func TestAddHlBc(t *testing.T) {
 	}
 
 	value := system.cpu.registers.readHL()
-	if value != 73 {
-		t.Logf("HL register value = %d, expected = %d", value, 73)
+	if value != 4096 {
+		t.Logf("HL register value = %d, expected = %d", value, 4096)
 		t.Fail()
 	}
 
-	// TODO test carry, half carry, zero, negative flags
+	if (system.cpu.registers.F & halfCarryFlag) != halfCarryFlag {
+		t.Logf("halfCarryFlag value = %X, expected = %X", system.cpu.registers.F&halfCarryFlag, halfCarryFlag)
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & carryFlag) != carryFlag {
+		t.Logf("carryFlag value = %X, expected = %X", system.cpu.registers.F&carryFlag, carryFlag)
+		t.Fail()
+	}
+
+	// Must be reseted
+	if (system.cpu.registers.F & negativeFlag) == negativeFlag {
+		t.Logf("negativeFlag value = %X, expected = %X", system.cpu.registers.F&negativeFlag, 0)
+		t.Fail()
+	}
+
+	// Must stay untouched
+	if (system.cpu.registers.F & zeroFlag) != zeroFlag {
+		t.Logf("zeroFlag value = %X, expected = %X", system.cpu.registers.F&zeroFlag, 0)
+		t.Fail()
+	}
 }

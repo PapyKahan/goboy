@@ -12,7 +12,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x06: &instruction{name: "LD B n", ticks: 8, length: 2, handler: handlerFunc(ldBn)},
 	0x07: &instruction{name: "RLCA", ticks: 4, length: 1, handler: handlerFunc(rlca)},
 	0x08: &instruction{name: "LD (nn) SP", ticks: 20, length: 3, handler: handlerFunc(ldNnpSp)},
-	0x09: &instruction{name: "ADD HL BC", ticks: 20, length: 3, handler: handlerFunc(addHlBc)},
+	0x09: &instruction{name: "ADD HL BC", ticks: 8, length: 1, handler: handlerFunc(addHlBc)},
 }
 
 type cpu struct {
@@ -107,13 +107,18 @@ func (cpu *cpu) aluDec(value byte) byte {
 	return value
 }
 
-func (cpu *cpu) add(a uint16, b uint16) uint16 {
-	value := a + b
+func (cpu *cpu) addWord(a uint16, b uint16) uint16 {
+	if uint(a)+uint(b) > 0xFFFF {
+		cpu.registers.F |= carryFlag
+	}
 
-	// TODO handle carryFlag and halfCarryFlag
+	if uint16(a&0x0FFF)+uint16(b&0x0FFF) > 0x0FFF {
+		cpu.registers.F |= halfCarryFlag
+	}
 
 	cpu.registers.F ^= negativeFlag
-	return value
+
+	return a + b
 }
 
 // Instructions implementation :
@@ -158,5 +163,5 @@ func ldNnpSp(cpu *cpu, value uint16) {
 func addHlBc(cpu *cpu, _ uint16) {
 	hl := cpu.registers.readHL()
 	bc := cpu.registers.readBC()
-	cpu.registers.writeHL(cpu.add(hl, bc))
+	cpu.registers.writeHL(cpu.addWord(hl, bc))
 }

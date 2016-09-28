@@ -109,22 +109,6 @@ func (cpu *cpu) aluDec(value byte) byte {
 	return value
 }
 
-func (cpu *cpu) aluDecWord(value uint16) uint16 {
-
-	// TODO Set carry, half-carry flags
-	value--
-
-	if value == 0 {
-		cpu.registers.F |= zeroFlag
-	} else {
-		cpu.registers.F ^= zeroFlag
-	}
-
-	cpu.registers.F |= negativeFlag
-
-	return value
-}
-
 func (cpu *cpu) addWord(a uint16, b uint16) uint16 {
 	if uint(a)+uint(b) > 0xFFFF {
 		cpu.registers.F |= carryFlag
@@ -189,5 +173,7 @@ func ldABcp(cpu *cpu, address uint16) {
 }
 
 func decBc(cpu *cpu, _ uint16) {
-	cpu.registers.writeBC(cpu.aluDecWord(cpu.registers.readBC()))
+	value := cpu.registers.readBC()
+	value--
+	cpu.registers.writeBC(value)
 }

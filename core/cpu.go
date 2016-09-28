@@ -14,6 +14,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x08: &instruction{name: "LD (nn) SP", ticks: 20, length: 3, handler: handlerFunc(ldNnpSp)},
 	0x09: &instruction{name: "ADD HL BC", ticks: 8, length: 1, handler: handlerFunc(addHlBc)},
 	0x0A: &instruction{name: "LD A, (BC)", ticks: 8, length: 1, handler: handlerFunc(ldABcp)},
+	0x0B: &instruction{name: "DEC BC", ticks: 8, length: 1, handler: handlerFunc(decBc)},
 }
 
 type cpu struct {
@@ -169,4 +170,10 @@ func addHlBc(cpu *cpu, _ uint16) {
 
 func ldABcp(cpu *cpu, address uint16) {
 	cpu.registers.A = cpu.mmu.readByte(cpu.registers.readBC())
+}
+
+func decBc(cpu *cpu, _ uint16) {
+	value := cpu.registers.readBC()
+	value--
+	cpu.registers.writeBC(value)
 }

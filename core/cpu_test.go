@@ -266,3 +266,22 @@ func TestLdABcp(t *testing.T) {
 		t.Logf("system.cpu.registers.A = %X, expected = %X", system.cpu.registers.A, 0x0F)
 	}
 }
+
+func TestDecBc(t *testing.T) {
+	system := New()
+	system.cpu.registers.pc = romBank00BaseAddress
+	system.cpu.mmu.writeByte(romBank00BaseAddress, 0xB)
+	system.cpu.registers.writeBC(0x1)
+	system.Execute()
+
+	instruction := (*system.cpu.instructionSet)[0x0B]
+	if system.cpu.registers.pc != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
+		t.Fail()
+	}
+
+	value := system.cpu.registers.readBC()
+	if value != 0x0 {
+		t.Logf("system.cpu.registers.BC = %X, expected = %X", value, 0x0)
+	}
+}

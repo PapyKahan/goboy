@@ -246,3 +246,23 @@ func TestAddHlBc(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestLdABcp(t *testing.T) {
+	system := New()
+	system.cpu.registers.pc = romBank00BaseAddress
+	system.cpu.mmu.writeByte(romBank00BaseAddress, 0xA)
+	system.cpu.registers.writeBC(workRAMBank0BaseAddress)
+	system.cpu.mmu.writeByte(workRAMBank0BaseAddress, 0x0F)
+	system.cpu.registers.A = 0x01
+	system.Execute()
+
+	instruction := (*system.cpu.instructionSet)[0x0A]
+	if system.cpu.registers.pc != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
+		t.Fail()
+	}
+
+	if system.cpu.registers.A != 0x0F {
+		t.Logf("system.cpu.registers.A = %X, expected = %X", system.cpu.registers.A, 0x0F)
+	}
+}

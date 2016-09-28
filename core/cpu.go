@@ -14,6 +14,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x08: &instruction{name: "LD (nn) SP", ticks: 20, length: 3, handler: handlerFunc(ldNnpSp)},
 	0x09: &instruction{name: "ADD HL BC", ticks: 8, length: 1, handler: handlerFunc(addHlBc)},
 	0x0A: &instruction{name: "LD A, (BC)", ticks: 8, length: 1, handler: handlerFunc(ldABcp)},
+	0x0B: &instruction{name: "DEC BC", ticks: 8, length: 1, handler: handlerFunc(decBc)},
 }
 
 type cpu struct {
@@ -108,6 +109,22 @@ func (cpu *cpu) aluDec(value byte) byte {
 	return value
 }
 
+func (cpu *cpu) aluDecWord(value uint16) uint16 {
+
+	// TODO Set carry, half-carry flags
+	value--
+
+	if value == 0 {
+		cpu.registers.F |= zeroFlag
+	} else {
+		cpu.registers.F ^= zeroFlag
+	}
+
+	cpu.registers.F |= negativeFlag
+
+	return value
+}
+
 func (cpu *cpu) addWord(a uint16, b uint16) uint16 {
 	if uint(a)+uint(b) > 0xFFFF {
 		cpu.registers.F |= carryFlag
@@ -169,4 +186,8 @@ func addHlBc(cpu *cpu, _ uint16) {
 
 func ldABcp(cpu *cpu, address uint16) {
 	cpu.registers.A = cpu.mmu.readByte(cpu.registers.readBC())
+}
+
+func decBc(cpu *cpu, _ uint16) {
+	cpu.registers.writeBC(cpu.aluDecWord(cpu.registers.readBC()))
 }

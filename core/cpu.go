@@ -16,6 +16,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x0A: &instruction{name: "LD A, (BC)", ticks: 8, length: 1, handler: handlerFunc(ldABcp)},
 	0x0B: &instruction{name: "DEC BC", ticks: 8, length: 1, handler: handlerFunc(decBc)},
 	0x0C: &instruction{name: "INC C", ticks: 4, length: 1, handler: handlerFunc(incC)},
+	0x0D: &instruction{name: "DEC C", ticks: 4, length: 1, handler: handlerFunc(decC)},
 }
 
 type cpu struct {
@@ -181,4 +182,8 @@ func decBc(cpu *cpu, _ uint16) {
 
 func incC(cpu *cpu, _ uint16) {
 	cpu.registers.C = cpu.aluInc(cpu.registers.C)
+}
+
+func decC(cpu *cpu, _ uint16) {
+	cpu.registers.C = cpu.aluDec(cpu.registers.C)
 }

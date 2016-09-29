@@ -300,6 +300,24 @@ func TestIncC(t *testing.T) {
 	}
 
 	if system.cpu.registers.C != 0x2 {
+		t.Logf("system.cpu.registers.C = %X, expected = %X", system.cpu.registers.C, 0x2)
+	}
+}
+
+func TestDecC(t *testing.T) {
+	system := New()
+	system.cpu.registers.pc = romBank00BaseAddress
+	system.cpu.mmu.writeByte(romBank00BaseAddress, 0xD)
+	system.cpu.registers.C = 0x1
+	system.Execute()
+
+	instruction := (*system.cpu.instructionSet)[0x0D]
+	if system.cpu.registers.pc != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
+		t.Fail()
+	}
+
+	if system.cpu.registers.C != 0x0 {
 		t.Logf("system.cpu.registers.C = %X, expected = %X", system.cpu.registers.C, 0x0)
 	}
 }

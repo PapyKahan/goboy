@@ -1,0 +1,10 @@
+language: go
+go: 
+    - 1.7.1
+    - release
+    - tip
+sudo: false
+before_script:
+    - go vet ./...
+script:
+    - go test -v ./...

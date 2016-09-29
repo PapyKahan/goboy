@@ -9,8 +9,8 @@
 			"revisionTime": "2016-03-06T11:11:50Z"
 		},
 		{
-			"checksumSHA1": "tvzDDdeViFmc+C4ATjpZ7wZ2VM0=",
-			"path": "github.com/go-gl/glfw/v3.1/glfw",
+			"checksumSHA1": "5sbBQY3FMaRucjtizqio+hjraZY=",
+			"path": "github.com/go-gl/glfw/v3.2/glfw",
 			"revision": "82775019c87191e4eebfb7d046d44e71a58ea21d",
 			"revisionTime": "2016-06-26T17:55:30Z"
 		}

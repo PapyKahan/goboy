@@ -57,10 +57,6 @@ type mmu struct {
 	// hram     [0x80]byte
 }
 
-func (mmu *mmu) initialize() {
-
-}
-
 func (mmu *mmu) readByte(address uint16) byte {
 	return mmu.memory[address]
 }

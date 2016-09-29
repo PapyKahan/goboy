@@ -2,7 +2,8 @@ language: go
 go: 
     - 1.7.1
     - tip
-sudo: false
+install:
+    - sudo apt-get install libXxf86vm-dev
 before_script:
     - go vet ./...
 script:

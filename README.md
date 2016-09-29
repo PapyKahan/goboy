@@ -1,4 +1,6 @@
+[![Build Status](https://travis-ci.org/cfajardo/goboy.svg?branch=master)](https://travis-ci.org/cfajardo/goboy)
 # goboy
+
 A Gameboy emulator in Go
 
 # resources

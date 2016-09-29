@@ -9,7 +9,7 @@ before_script:
 - go vet ./...
 script:
 - go test -v -covermode=count ./...
-- goveralls -service=travis-ci -repotoken $COVERALLS_TOKEN
+- goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 env:
   global:
     secure: Tjdp5yLHroc+ULT6HliQqA+n11bHl2r52wXNvO4Eo9N2vDPd7Zrxp6OmKO63L3aIfRV525DiA6BSrkEGu/oYwDbj9oSKZX1x57bCFBDEGqs6+US7PsG9aIYabRQcQ52AsYKVbGHtNVj0BYOe+Mo9hOtg9D7pghkaRvxawDFpomcjCXNBxHWjaM1Y7v/whjrct9DWNPVd5EF3NErm7NzaM6vrO1nm5H4vLusFO2Pd/CzwsDHnawL6eTuyqOAkc/bqMsXzPmAi1mJWUX2LQLGGXYE/FbIQ2KNqnz3ywR6LcHeMT+7qPYomHtE3jBt8LU6pC5n0CNEkKhDFC1CQuEIgyWH5/eQIzD78U/qCn/D0eENwNxx1iTPMQQ3i95BTjN6pYsGAd5u4rUZ3L2s2SZjzW/B7fu3JMCsT9w29cbENiESaHswfrHgm0BMkY19kHHQItKSXs9PgCfxCEuRvuiBIAxTlLSLFl8jmuJTNYVMtVS3VEzXht3Yi4PXB73FB4P6ZoTraefzTDyTYRufxnEP65tgcKngH5gv4CCf0LyH/eetTVHK7F/zLVX23S2Bku5hS8nGacsQy+5kRhBzKvi7DXpO6OxXWN1bV7FbNWs9Hf8yWA+3WrXfGdUd89pU6goq1Oyg2rpvJ/jXLljzxcOjdYfAm/eAwzqbqSMNMw9Yt3U0=

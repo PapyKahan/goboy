@@ -354,6 +354,7 @@ func TestRrca(t *testing.T) {
 	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x0F)
 	system.cpu.registers.A = 0x05
+	system.cpu.registers.F |= carryFlag | zeroFlag | halfCarryFlag | negativeFlag
 	system.Execute()
 
 	instruction := (*system.cpu.instructionSet)[0x0F]
@@ -362,8 +363,28 @@ func TestRrca(t *testing.T) {
 		t.Fail()
 	}
 
-	if system.cpu.registers.A != 0x02 {
-		t.Logf("system.cpu.registers.A = %X, expected = %X", system.cpu.registers.A, 0x02)
+	if system.cpu.registers.A != 0x82 {
+		t.Logf("system.cpu.registers.A = %X, expected = %X", system.cpu.registers.A, 0x82)
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & carryFlag) != carryFlag {
+		t.Logf("system.cpu.registers.F = %X, expected = %X", system.cpu.registers.F, carryFlag)
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & negativeFlag) == negativeFlag {
+		t.Logf("Negative flag must be reseted")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & zeroFlag) == zeroFlag {
+		t.Logf("Zero flag must be reseted")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & halfCarryFlag) == halfCarryFlag {
+		t.Logf("Half carry flag must be reseted")
 		t.Fail()
 	}
 }

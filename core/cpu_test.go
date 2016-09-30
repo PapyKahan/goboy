@@ -403,8 +403,8 @@ func TestRrcaResetCarryFlag(t *testing.T) {
 		t.Fail()
 	}
 
-	if system.cpu.registers.A != 0x82 {
-		t.Logf("system.cpu.registers.A = %X, expected = %X", system.cpu.registers.A, 0x82)
+	if system.cpu.registers.A != 0x81 {
+		t.Logf("system.cpu.registers.A = %X, expected = %X", system.cpu.registers.A, 0x81)
 		t.Fail()
 	}
 

@@ -73,6 +73,23 @@ func (cpu *cpu) aluRotateLeftCarry(value byte) byte {
 	return value
 }
 
+func (cpu *cpu) aluRotateRightCarry(value byte) byte {
+	carry := value & 0x01
+	value >>= 1
+	if (cpu.registers.F & carryFlag) == carryFlag {
+		value += 0x80
+	}
+	if carry == 1 {
+		cpu.registers.F |= carryFlag
+	} else {
+		cpu.registers.F ^= carryFlag
+	}
+
+	cpu.registers.F ^= negativeFlag | zeroFlag | halfCarryFlag
+
+	return value
+}
+
 func (cpu *cpu) aluInc(value byte) byte {
 	if value&0x0F == 0 {
 		cpu.registers.F |= halfCarryFlag
@@ -195,8 +212,5 @@ func ldCN(cpu *cpu, value uint16) {
 }
 
 func rrca(cpu *cpu, _ uint16) {
-	if cpu.registers.A&0x01 == 0x01 {
-		cpu.registers.F |= carryFlag
-	}
-	cpu.registers.A = cpu.registers.A >> 1
+	cpu.registers.A = cpu.aluRotateRightCarry(cpu.registers.A)
 }

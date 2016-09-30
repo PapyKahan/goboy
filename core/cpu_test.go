@@ -374,17 +374,57 @@ func TestRrca(t *testing.T) {
 	}
 
 	if (system.cpu.registers.F & negativeFlag) == negativeFlag {
-		t.Logf("Negative flag must be reseted")
+		t.Log("Negative flag must be reseted")
 		t.Fail()
 	}
 
 	if (system.cpu.registers.F & zeroFlag) == zeroFlag {
-		t.Logf("Zero flag must be reseted")
+		t.Log("Zero flag must be reseted")
 		t.Fail()
 	}
 
 	if (system.cpu.registers.F & halfCarryFlag) == halfCarryFlag {
-		t.Logf("Half carry flag must be reseted")
+		t.Log("Half carry flag must be reseted")
+		t.Fail()
+	}
+}
+
+func TestRrcaResetCarryFlag(t *testing.T) {
+	system := New()
+	system.cpu.registers.pc = romBank00BaseAddress
+	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x0F)
+	system.cpu.registers.A = 0x02
+	system.cpu.registers.F |= carryFlag | zeroFlag | halfCarryFlag | negativeFlag
+	system.Execute()
+
+	instruction := (*system.cpu.instructionSet)[0x0F]
+	if system.cpu.registers.pc != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
+		t.Fail()
+	}
+
+	if system.cpu.registers.A != 0x82 {
+		t.Logf("system.cpu.registers.A = %X, expected = %X", system.cpu.registers.A, 0x82)
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & carryFlag) == carryFlag {
+		t.Log("Carry flag must be reseted")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & negativeFlag) == negativeFlag {
+		t.Log("Negative flag must be reseted")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & zeroFlag) == zeroFlag {
+		t.Log("Zero flag must be reseted")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & halfCarryFlag) == halfCarryFlag {
+		t.Log("Half carry flag must be reseted")
 		t.Fail()
 	}
 }

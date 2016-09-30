@@ -169,14 +169,17 @@ func TestRlca(t *testing.T) {
 
 	if (system.cpu.registers.F & negativeFlag) == negativeFlag {
 		t.Logf("Negative flag must be reseted")
+		t.Fail()
 	}
 
 	if (system.cpu.registers.F & zeroFlag) == zeroFlag {
 		t.Logf("Zero flag must be reseted")
+		t.Fail()
 	}
 
 	if (system.cpu.registers.F & halfCarryFlag) == halfCarryFlag {
 		t.Logf("Half carry flag must be reseted")
+		t.Fail()
 	}
 }
 
@@ -264,6 +267,7 @@ func TestLdABcp(t *testing.T) {
 
 	if system.cpu.registers.A != 0x0F {
 		t.Logf("system.cpu.registers.A = %X, expected = %X", system.cpu.registers.A, 0x0F)
+		t.Fail()
 	}
 }
 
@@ -283,6 +287,7 @@ func TestDecBc(t *testing.T) {
 	value := system.cpu.registers.readBC()
 	if value != 0x0 {
 		t.Logf("system.cpu.registers.BC = %X, expected = %X", value, 0x0)
+		t.Fail()
 	}
 }
 
@@ -301,6 +306,7 @@ func TestIncC(t *testing.T) {
 
 	if system.cpu.registers.C != 0x2 {
 		t.Logf("system.cpu.registers.C = %X, expected = %X", system.cpu.registers.C, 0x2)
+		t.Fail()
 	}
 }
 
@@ -319,6 +325,7 @@ func TestDecC(t *testing.T) {
 
 	if system.cpu.registers.C != 0x0 {
 		t.Logf("system.cpu.registers.C = %X, expected = %X", system.cpu.registers.C, 0x0)
+		t.Fail()
 	}
 }
 
@@ -338,6 +345,7 @@ func TestLdCN(t *testing.T) {
 
 	if system.cpu.registers.C != 0xE {
 		t.Logf("system.cpu.registers.C = %X, expected = %X", system.cpu.registers.C, 0xE)
+		t.Fail()
 	}
 }
 
@@ -354,7 +362,8 @@ func TestRrca(t *testing.T) {
 		t.Fail()
 	}
 
-	if system.cpu.registers.C != 0x02 {
+	if system.cpu.registers.A != 0x02 {
 		t.Logf("system.cpu.registers.A = %X, expected = %X", system.cpu.registers.A, 0x02)
+		t.Fail()
 	}
 }

@@ -6,6 +6,7 @@ func TestNop(t *testing.T) {
 	system := New()
 	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x0)
+	system.cpu.registers.F = zeroFlag | negativeFlag | halfCarryFlag | carryFlag
 	system.Execute()
 
 	instruction := (*system.cpu.instructionSet)[0x0]
@@ -13,14 +14,17 @@ func TestNop(t *testing.T) {
 		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
 		t.Fail()
 	}
+	untouchedFlagsTest(system.cpu.registers.F, t)
 }
 
 func TestLdBcNn(t *testing.T) {
 	system := New()
-	system.cpu.registers.writeBC(0x0)
 	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x1)
 	system.cpu.mmu.writeWord(romBank00BaseAddress+1, 0xFF0F)
+
+	system.cpu.registers.writeBC(0x0)
+	system.cpu.registers.F = zeroFlag | negativeFlag | halfCarryFlag | carryFlag
 
 	system.Execute()
 	instruction := (*system.cpu.instructionSet)[0x1]
@@ -38,15 +42,20 @@ func TestLdBcNn(t *testing.T) {
 		t.Logf("system.cpu.registers.C = %X, expected = %X", system.cpu.registers.C, 0x0F)
 		t.Fail()
 	}
+
+	untouchedFlagsTest(system.cpu.registers.F, t)
 }
 
 func TestLdBcpA(t *testing.T) {
 	system := New()
+	system.cpu.registers.pc = romBank00BaseAddress
+	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x2)
+
 	system.cpu.registers.A = 0xF0
 	system.cpu.registers.writeBC(workRAMBank0BaseAddress)
 	system.cpu.mmu.writeByte(workRAMBank0BaseAddress, 0xF0)
-	system.cpu.registers.pc = romBank00BaseAddress
-	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x2)
+	system.cpu.registers.F = zeroFlag | negativeFlag | halfCarryFlag | carryFlag
+
 	system.Execute()
 
 	instruction := (*system.cpu.instructionSet)[0x2]
@@ -60,13 +69,35 @@ func TestLdBcpA(t *testing.T) {
 		t.Logf("system.cpu.mmu.memory[0xC000] = %X, expected = %X", value, 0xF0)
 		t.Fail()
 	}
+
+	untouchedFlagsTest(system.cpu.registers.F, t)
+}
+
+func untouchedFlagsTest(f flags, t *testing.T) {
+	if f&zeroFlag == 0x0 {
+		t.Log("Zero flag must stay untouched")
+		t.Fail()
+	}
+	if f&negativeFlag == 0x0 {
+		t.Log("Negative flag must stay untouched")
+		t.Fail()
+	}
+	if f&halfCarryFlag == 0x0 {
+		t.Log("Half carry flag must stay untouched")
+		t.Fail()
+	}
+	if f&carryFlag == 0x0 {
+		t.Log("Carry flag must stay untouched")
+		t.Fail()
+	}
 }
 
 func TestIncBc(t *testing.T) {
 	system := New()
-	system.cpu.registers.writeBC(0x0101)
 	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x3)
+	system.cpu.registers.writeBC(0x0101)
+	system.cpu.registers.F = zeroFlag | negativeFlag | halfCarryFlag | carryFlag
 	system.Execute()
 	instruction := (*system.cpu.instructionSet)[0x3]
 	if system.cpu.registers.pc != uint16(instruction.length) {
@@ -83,13 +114,16 @@ func TestIncBc(t *testing.T) {
 		t.Logf("system.cpu.registers.C = %X, expected = %X", system.cpu.registers.C, 0x02)
 		t.Fail()
 	}
+	untouchedFlagsTest(system.cpu.registers.F, t)
 }
 
 func TestIncB(t *testing.T) {
 	system := New()
-	system.cpu.registers.B = 0x01
 	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x4)
+	system.cpu.registers.B = 0x0F
+	system.cpu.registers.F = zeroFlag | negativeFlag | carryFlag
+
 	system.Execute()
 	instruction := (*system.cpu.instructionSet)[0x4]
 	if system.cpu.registers.pc != uint16(instruction.length) {
@@ -97,19 +131,79 @@ func TestIncB(t *testing.T) {
 		t.Fail()
 	}
 
-	if system.cpu.registers.B != 0x02 {
-		t.Logf("system.cpu.registers.B = %X, expected = %X", system.cpu.registers.B, 0x02)
+	if system.cpu.registers.B != 0x10 {
+		t.Logf("system.cpu.registers.B = %X, expected = %X", system.cpu.registers.B, 0x010)
 		t.Fail()
 	}
 
-	//TODO test affected flags
+	if (system.cpu.registers.F & carryFlag) != carryFlag {
+		t.Log("Negative flag must be stay untouched")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & negativeFlag) == negativeFlag {
+		t.Log("Negative flag must be reseted")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & zeroFlag) == zeroFlag {
+		t.Log("Zero flag must be reseted")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & halfCarryFlag) != halfCarryFlag {
+		t.Log("This operation must set half carry flag")
+		t.Fail()
+	}
+}
+
+func TestIncBOverflow(t *testing.T) {
+	system := New()
+	system.cpu.registers.pc = romBank00BaseAddress
+	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x4)
+	system.cpu.registers.B = 0xFF
+	system.cpu.registers.F = zeroFlag | negativeFlag | carryFlag
+
+	system.Execute()
+	instruction := (*system.cpu.instructionSet)[0x4]
+	if system.cpu.registers.pc != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
+		t.Fail()
+	}
+
+	if system.cpu.registers.B != 0x00 {
+		t.Logf("system.cpu.registers.B = %X, expected = %X", system.cpu.registers.B, 0x0)
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & carryFlag) != carryFlag {
+		t.Log("Negative flag must be stay untouched")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & negativeFlag) == negativeFlag {
+		t.Log("Negative flag must be reseted")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & zeroFlag) != zeroFlag {
+		t.Log("This operation must set zero flag")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & halfCarryFlag) != halfCarryFlag {
+		t.Log("This operation must set half carry flag")
+		t.Fail()
+	}
 }
 
 func TestDecB(t *testing.T) {
 	system := New()
-	system.cpu.registers.B = 0x01
 	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x5)
+	system.cpu.registers.B = 0xF
+	system.cpu.registers.F = zeroFlag | negativeFlag | carryFlag | halfCarryFlag
+
 	system.Execute()
 	instruction := (*system.cpu.instructionSet)[0x5]
 	if system.cpu.registers.pc != uint16(instruction.length) {
@@ -117,20 +211,79 @@ func TestDecB(t *testing.T) {
 		t.Fail()
 	}
 
-	if system.cpu.registers.B != 0x00 {
-		t.Logf("system.cpu.registers.B = %X, expected = %X", system.cpu.registers.B, 0x00)
+	if system.cpu.registers.B != 0x0E {
+		t.Logf("system.cpu.registers.B = %X, expected = %X", system.cpu.registers.B, 0x0E)
 		t.Fail()
 	}
 
-	//TODO test affected flags
+	if (system.cpu.registers.F & carryFlag) != carryFlag {
+		t.Log("Negative flag must be stay untouched")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & negativeFlag) != negativeFlag {
+		t.Log("Negative flag must be set")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & zeroFlag) == zeroFlag {
+		t.Log("Zero flag must be reseted.")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & halfCarryFlag) != halfCarryFlag {
+		t.Log("This operation must set half carry flag")
+		t.Fail()
+	}
+}
+
+func TestDecBZeroFlag(t *testing.T) {
+	system := New()
+	system.cpu.registers.pc = romBank00BaseAddress
+	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x5)
+	system.cpu.registers.B = 0x1
+	system.cpu.registers.F = zeroFlag | negativeFlag | carryFlag | halfCarryFlag
+
+	system.Execute()
+	instruction := (*system.cpu.instructionSet)[0x5]
+	if system.cpu.registers.pc != uint16(instruction.length) {
+		t.Logf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
+		t.Fail()
+	}
+
+	if system.cpu.registers.B != 0x0 {
+		t.Logf("system.cpu.registers.B = %X, expected = %X", system.cpu.registers.B, 0x0)
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & carryFlag) != carryFlag {
+		t.Log("Negative flag must be stay untouched")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & negativeFlag) != negativeFlag {
+		t.Log("Negative flag must be set")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & zeroFlag) != zeroFlag {
+		t.Log("Zero flag must be set")
+		t.Fail()
+	}
+
+	if (system.cpu.registers.F & halfCarryFlag) != halfCarryFlag {
+		t.Log("This operation must set half carry flag")
+		t.Fail()
+	}
 }
 
 func TestLdBn(t *testing.T) {
 	system := New()
-	system.cpu.registers.B = 0x00
 	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x6)
 	system.cpu.mmu.writeByte(romBank00BaseAddress+1, 0x6)
+	system.cpu.registers.B = 0x00
+	system.cpu.registers.F = zeroFlag | negativeFlag | carryFlag | halfCarryFlag
 	system.Execute()
 	instruction := (*system.cpu.instructionSet)[0x6]
 	if system.cpu.registers.pc != uint16(instruction.length) {
@@ -142,6 +295,8 @@ func TestLdBn(t *testing.T) {
 		t.Logf("system.cpu.registers.B = %X, expected = %X", system.cpu.registers.B, 0x06)
 		t.Fail()
 	}
+
+	untouchedFlagsTest(system.cpu.registers.F, t)
 }
 
 func TestRlca(t *testing.T) {
@@ -163,32 +318,33 @@ func TestRlca(t *testing.T) {
 	}
 
 	if (system.cpu.registers.F & carryFlag) != carryFlag {
-		t.Logf("system.cpu.registers.F = %X, expected = %X", system.cpu.registers.F, carryFlag)
+		t.Log("Carry flag must stay untouched")
 		t.Fail()
 	}
 
 	if (system.cpu.registers.F & negativeFlag) == negativeFlag {
-		t.Logf("Negative flag must be reseted")
+		t.Log("Negative flag must be reseted")
 		t.Fail()
 	}
 
 	if (system.cpu.registers.F & zeroFlag) == zeroFlag {
-		t.Logf("Zero flag must be reseted")
+		t.Log("Zero flag must be reseted")
 		t.Fail()
 	}
 
 	if (system.cpu.registers.F & halfCarryFlag) == halfCarryFlag {
-		t.Logf("Half carry flag must be reseted")
+		t.Log("Half carry flag must be reseted")
 		t.Fail()
 	}
 }
 
 func TestLdNnpSp(t *testing.T) {
 	system := New()
-	system.cpu.registers.sp = 0xF0FF
 	system.cpu.registers.pc = romBank00BaseAddress
 	system.cpu.mmu.writeByte(romBank00BaseAddress, 0x8)
 	system.cpu.mmu.writeWord(romBank00BaseAddress+1, workRAMBank0BaseAddress)
+	system.cpu.registers.sp = 0xF0FF
+	system.cpu.registers.F = zeroFlag | negativeFlag | carryFlag | halfCarryFlag
 	system.Execute()
 	instruction := (*system.cpu.instructionSet)[0x8]
 	if system.cpu.registers.pc != uint16(instruction.length) {
@@ -201,6 +357,8 @@ func TestLdNnpSp(t *testing.T) {
 		t.Logf("(%X) address value = %X, expected = %X", workRAMBank0BaseAddress, value, 0xF0FF)
 		t.Fail()
 	}
+
+	untouchedFlagsTest(system.cpu.registers.F, t)
 }
 
 func TestAddHlBc(t *testing.T) {
@@ -237,7 +395,7 @@ func TestAddHlBc(t *testing.T) {
 		t.Fail()
 	}
 
-	// Must be reseted
+	// Must be reset
 	if (system.cpu.registers.F & negativeFlag) == negativeFlag {
 		t.Logf("negativeFlag value = %X, expected = %X", system.cpu.registers.F&negativeFlag, 0)
 		t.Fail()

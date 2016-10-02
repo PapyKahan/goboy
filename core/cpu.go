@@ -91,7 +91,7 @@ func (cpu *cpu) aluRotateRightCarry(value byte) byte {
 }
 
 func (cpu *cpu) aluInc(value byte) byte {
-	if value&0x0F == 0 {
+	if value&0x0F == 0x0F {
 		cpu.registers.F |= halfCarryFlag
 	} else {
 		cpu.registers.F ^= halfCarryFlag

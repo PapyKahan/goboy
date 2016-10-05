@@ -65,10 +65,10 @@ func (cpu *cpu) aluRotateLeftCarry(value byte) byte {
 	if carry == 1 {
 		cpu.registers.F |= carryFlag
 	} else {
-		cpu.registers.F ^= carryFlag
+		cpu.registers.F &^= carryFlag
 	}
 
-	cpu.registers.F ^= negativeFlag | zeroFlag | halfCarryFlag
+	cpu.registers.F &^= negativeFlag | zeroFlag | halfCarryFlag
 
 	return value
 }
@@ -82,10 +82,10 @@ func (cpu *cpu) aluRotateRightCarry(value byte) byte {
 	if carry == 1 {
 		cpu.registers.F |= carryFlag
 	} else {
-		cpu.registers.F ^= carryFlag
+		cpu.registers.F &^= carryFlag
 	}
 
-	cpu.registers.F ^= negativeFlag | zeroFlag | halfCarryFlag
+	cpu.registers.F &^= negativeFlag | zeroFlag | halfCarryFlag
 
 	return value
 }
@@ -94,7 +94,7 @@ func (cpu *cpu) aluInc(value byte) byte {
 	if value&0x0F == 0x0F {
 		cpu.registers.F |= halfCarryFlag
 	} else {
-		cpu.registers.F ^= halfCarryFlag
+		cpu.registers.F &^= halfCarryFlag
 	}
 
 	value++
@@ -102,17 +102,17 @@ func (cpu *cpu) aluInc(value byte) byte {
 	if value == 0 {
 		cpu.registers.F |= zeroFlag
 	} else {
-		cpu.registers.F ^= zeroFlag
+		cpu.registers.F &^= zeroFlag
 	}
 
-	cpu.registers.F ^= negativeFlag
+	cpu.registers.F &^= negativeFlag
 
 	return value
 }
 
 func (cpu *cpu) aluDec(value byte) byte {
 	if value&0x0F == 0x0 {
-		cpu.registers.F ^= halfCarryFlag
+		cpu.registers.F &^= halfCarryFlag
 	} else {
 		cpu.registers.F |= halfCarryFlag
 	}
@@ -122,7 +122,7 @@ func (cpu *cpu) aluDec(value byte) byte {
 	if value == 0 {
 		cpu.registers.F |= zeroFlag
 	} else {
-		cpu.registers.F ^= zeroFlag
+		cpu.registers.F &^= zeroFlag
 	}
 
 	cpu.registers.F |= negativeFlag
@@ -139,7 +139,7 @@ func (cpu *cpu) addWord(a uint16, b uint16) uint16 {
 		cpu.registers.F |= halfCarryFlag
 	}
 
-	cpu.registers.F ^= negativeFlag
+	cpu.registers.F &^= negativeFlag
 
 	return a + b
 }

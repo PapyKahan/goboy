@@ -252,7 +252,7 @@ func testIncB(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
-			t.Error("Carry flag must be enabled")
+			t.Error("Carry flag must be stay untouched")
 		}
 	}
 }
@@ -279,14 +279,14 @@ func testIncBOverflowAndHalfCarry(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
-			t.Error("Carry flag must be enabled")
+			t.Error("Carry flag must stay untouched")
 		}
 	}
 }
 
 func testDecB(t *testing.T, cpu *cpu) func() {
 	cpu.registers.B = 0xF
-	cpu.registers.F = zeroFlag | negativeFlag | carryFlag | halfCarryFlag
+	cpu.registers.F = zeroFlag | negativeFlag | halfCarryFlag | carryFlag
 
 	return func() {
 		if cpu.registers.B != 0x0E {
@@ -304,15 +304,16 @@ func testDecB(t *testing.T, cpu *cpu) func() {
 		if (cpu.registers.F & halfCarryFlag) != halfCarryFlag {
 			t.Error("Half carry flag must be enabled")
 		}
+
 		if (cpu.registers.F & carryFlag) != carryFlag {
-			t.Error("Carry flag must be enabled")
+			t.Error("Carry flag must stay untouched")
 		}
 	}
 }
 
 func testDecBZeroFlag(t *testing.T, cpu *cpu) func() {
 	cpu.registers.B = 0x1
-	cpu.registers.F = zeroFlag | negativeFlag | carryFlag | halfCarryFlag
+	cpu.registers.F = zeroFlag | negativeFlag | halfCarryFlag | carryFlag
 
 	return func() {
 		if cpu.registers.B != 0x0 {
@@ -332,14 +333,14 @@ func testDecBZeroFlag(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
-			t.Error("Carry flag must be enabled")
+			t.Error("Carry flag must stay untouched")
 		}
 	}
 }
 
 func testDecBUnderflow(t *testing.T, cpu *cpu) func() {
 	cpu.registers.B = 0x0
-	cpu.registers.F = zeroFlag | negativeFlag | carryFlag | halfCarryFlag
+	cpu.registers.F = zeroFlag | negativeFlag | halfCarryFlag | carryFlag
 
 	return func() {
 		if cpu.registers.B != 0xFF {
@@ -359,7 +360,7 @@ func testDecBUnderflow(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
-			t.Error("Carry flag must be enabled")
+			t.Error("Carry flag must stay untouched")
 		}
 	}
 }

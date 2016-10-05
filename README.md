@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/cfajardo/goboy.svg?branch=master)](https://travis-ci.org/cfajardo/goboy) [![Coverage Status](https://coveralls.io/repos/github/cfajardo/goboy/badge.svg?branch=master)](https://coveralls.io/github/cfajardo/goboy?branch=master)
+[![Build Status](https://travis-ci.org/cfajardo/goboy.svg?branch=master)](https://travis-ci.org/cfajardo/goboy) [![Coverage Status](https://coveralls.io/repos/github/cfajardo/goboy/badge.svg?branch=master)](https://coveralls.io/github/cfajardo/goboy?branch=master) [![Code Climate](https://codeclimate.com/github/cfajardo/goboy/badges/gpa.svg)](https://codeclimate.com/github/cfajardo/goboy)
 # goboy
 
 A Gameboy emulator in Go

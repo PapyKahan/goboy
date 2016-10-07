@@ -6,6 +6,7 @@ type instructionTestFunction func(t *testing.T, cpu *cpu) func()
 
 func TestMiscControlInstructions(t *testing.T) {
 	t.Run("NOP", noFlagModificationInstructionTestHandler(testNop, 0x00))
+	t.Run("STOP", noFlagModificationInstructionTestHandler(testStop, 0x10))
 }
 
 func TestLoadMoveStoreInstructions(t *testing.T) {
@@ -97,6 +98,14 @@ func noFlagModificationInstructionTestHandler(test instructionTestFunction, opco
 
 func testNop(t *testing.T, cpu *cpu) func() {
 	return func() {}
+}
+
+func testStop(t *testing.T, cpu *cpu) func() {
+	return func() {
+		if !cpu.stoped {
+			t.Error("Cpu must be stoped")
+		}
+	}
 }
 
 func testLdBcNn(t *testing.T, cpu *cpu) func() {

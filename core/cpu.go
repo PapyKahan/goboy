@@ -19,11 +19,13 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x0D: &instruction{name: "DEC C", ticks: 4, length: 1, handler: handlerFunc(decC)},
 	0x0E: &instruction{name: "LD C n", ticks: 8, length: 2, handler: handlerFunc(ldCN)},
 	0x0F: &instruction{name: "RRCA", ticks: 4, length: 1, handler: handlerFunc(rrca)},
+	0x10: &instruction{name: "STOP", ticks: 4, length: 2, handler: handlerFunc(stop)},
 }
 
 type cpu struct {
 	registers      registers
 	ticks          uint64
+	stoped         bool
 	instructionSet *map[int]*instruction
 
 	// Processing units
@@ -37,6 +39,8 @@ func (cpu *cpu) initialize() {
 	cpu.mmu = &mmu{}
 	cpu.gpu = &gpu{}
 	cpu.spu = &spu{}
+
+	cpu.stoped = false
 }
 
 func (cpu *cpu) initializeInstructionset() error {
@@ -48,6 +52,10 @@ func (cpu *cpu) initializeInstructionset() error {
 }
 
 func (cpu *cpu) next() error {
+	if cpu.stoped {
+		return nil
+	}
+
 	opcode := cpu.mmu.readByte(cpu.registers.pc)
 	cpu.registers.pc++
 	inst := (*cpu.instructionSet)[int(opcode)]
@@ -213,4 +221,8 @@ func ldCN(cpu *cpu, value uint16) {
 
 func rrca(cpu *cpu, _ uint16) {
 	cpu.registers.A = cpu.aluRotateRightCarry(cpu.registers.A)
+}
+
+func stop(cpu *cpu, _ uint16) {
+	cpu.stoped = true
 }

@@ -70,7 +70,7 @@ func (cpu *cpu) next() error {
 	return nil
 }
 
-func (cpu *cpu) aluRotateLeftCarry(value byte) byte {
+func (cpu *cpu) rotateLeftCarry(value byte) byte {
 	carry := (value & 0x80) == 0x80
 
 	value <<= 1
@@ -84,12 +84,18 @@ func (cpu *cpu) aluRotateLeftCarry(value byte) byte {
 		cpu.registers.F &^= carryFlag
 	}
 
-	cpu.registers.F &^= negativeFlag | zeroFlag | halfCarryFlag
+	if value == 0 {
+		cpu.registers.F |= zeroFlag
+	} else {
+		cpu.registers.F &^= zeroFlag
+	}
+
+	cpu.registers.F &^= negativeFlag | halfCarryFlag
 
 	return value
 }
 
-func (cpu *cpu) aluRotateLeft(value byte) byte {
+func (cpu *cpu) rotateLeft(value byte) byte {
 	carry := cpu.registers.F&carryFlag == carryFlag
 
 	if value&0x80 == 0x80 {
@@ -103,24 +109,38 @@ func (cpu *cpu) aluRotateLeft(value byte) byte {
 		value++
 	}
 
-	cpu.registers.F &^= zeroFlag | negativeFlag | halfCarryFlag
+	if value == 0 {
+		cpu.registers.F |= zeroFlag
+	} else {
+		cpu.registers.F &^= zeroFlag
+	}
+
+	cpu.registers.F &^= negativeFlag | halfCarryFlag
 
 	return value
 }
 
 func (cpu *cpu) aluRotateRightCarry(value byte) byte {
-	carry := value & 0x01
-	value >>= 1
-	if (cpu.registers.F & carryFlag) == carryFlag {
-		value += 0x80
-	}
-	if carry == 1 {
+	carry := value&0x01 == 0x01
+
+	if carry {
 		cpu.registers.F |= carryFlag
 	} else {
 		cpu.registers.F &^= carryFlag
 	}
 
-	cpu.registers.F &^= negativeFlag | zeroFlag | halfCarryFlag
+	value >>= 1
+	if carry {
+		value |= 0x80
+	}
+
+	if value == 0 {
+		cpu.registers.F |= zeroFlag
+	} else {
+		cpu.registers.F &^= zeroFlag
+	}
+
+	cpu.registers.F &^= negativeFlag | halfCarryFlag
 
 	return value
 }
@@ -211,7 +231,8 @@ func ldBn(cpu *cpu, parameter uint16) {
 }
 
 func rlca(cpu *cpu, _ uint16) {
-	cpu.registers.A = cpu.aluRotateLeftCarry(cpu.registers.A)
+	cpu.registers.A = cpu.rotateLeftCarry(cpu.registers.A)
+	cpu.registers.F &^= zeroFlag
 }
 
 func ldNnpSp(cpu *cpu, value uint16) {
@@ -248,6 +269,7 @@ func ldCN(cpu *cpu, value uint16) {
 
 func rrca(cpu *cpu, _ uint16) {
 	cpu.registers.A = cpu.aluRotateRightCarry(cpu.registers.A)
+	cpu.registers.F &^= zeroFlag
 }
 
 func stop(cpu *cpu, _ uint16) {
@@ -281,5 +303,6 @@ func ldDn(cpu *cpu, value uint16) {
 }
 
 func rla(cpu *cpu, _ uint16) {
-	cpu.registers.A = cpu.aluRotateLeft(cpu.registers.A)
+	cpu.registers.A = cpu.rotateLeft(cpu.registers.A)
+	cpu.registers.F &^= zeroFlag
 }

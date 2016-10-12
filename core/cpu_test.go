@@ -55,9 +55,14 @@ func Test8BitsArithmeticLogicalInstructions(t *testing.T) {
 
 func Test8bitRotationsshiftsAndBitInstructions(t *testing.T) {
 	t.Run("RCLA", instructionTestHandler(testRlca, 0x07))
-	t.Run("RCLA apply carry and reset carry flag", instructionTestHandler(testRlcaApplyCarryAndResetCarryFlag, 0x07))
+	t.Run("RCLA apply carry and disable carry flag", instructionTestHandler(testRlcaApplyCarryAndResetCarryFlag, 0x07))
+
 	t.Run("RRCA", instructionTestHandler(testRrca, 0x0F))
-	t.Run("RRCA apply carry reset carry flag", instructionTestHandler(testRrcaApplyCarryAndResetCarryFlag, 0x0F))
+	t.Run("RRCA apply carry and disable carry flag", instructionTestHandler(testRrcaApplyCarryAndResetCarryFlag, 0x0F))
+
+	t.Run("RLA", instructionTestHandler(testRla, 0x17))
+	t.Run("RLA apply carry and disable carry flag", instructionTestHandler(testRlaApplyCarryAndResetCarryFlag, 0x17))
+	t.Run("RLA apply carry and enable carry flag", instructionTestHandler(testRlaApplyCarryAndEnableCarryFlag, 0x17))
 }
 
 func instructionTestHandler(test instructionTestFunction, opcode byte) func(t *testing.T) {
@@ -803,55 +808,55 @@ func testDecDUnderflow(t *testing.T, cpu *cpu) func() {
 }
 
 func testRlca(t *testing.T, cpu *cpu) func() {
-	cpu.registers.F = negativeFlag | zeroFlag | halfCarryFlag
-	cpu.registers.A = 0x81
+	cpu.registers.F = zeroFlag | negativeFlag | halfCarryFlag | carryFlag
+	cpu.registers.A = 0x01
 
 	return func() {
 		if cpu.registers.A != 0x02 {
-			t.Errorf("cpu.registers.B = %X, expected = %X", cpu.registers.A, 0x02)
+			t.Errorf("cpu.registers.A = %X, expected = %X", cpu.registers.A, 0x02)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
-			t.Error("Zero flag must be reset")
+			t.Error("Zero flag must be disabled")
 		}
 
 		if (cpu.registers.F & negativeFlag) == negativeFlag {
-			t.Error("Negative flag must be reset")
+			t.Error("Negative flag must be disabled")
 		}
 
 		if (cpu.registers.F & halfCarryFlag) == halfCarryFlag {
-			t.Error("Half carry flag must be reset")
+			t.Error("Half carry flag must be disabled")
 		}
 
-		if (cpu.registers.F & carryFlag) != carryFlag {
-			t.Error("Carry flag must stay untouched")
+		if (cpu.registers.F & carryFlag) == carryFlag {
+			t.Error("Carry flag must be disabled")
 		}
 	}
 }
 
 func testRlcaApplyCarryAndResetCarryFlag(t *testing.T, cpu *cpu) func() {
-	cpu.registers.F = negativeFlag | zeroFlag | halfCarryFlag | carryFlag
-	cpu.registers.A = 0x1
+	cpu.registers.F = negativeFlag | zeroFlag | halfCarryFlag
+	cpu.registers.A = 0x81
 
 	return func() {
 		if cpu.registers.A != 0x03 {
-			t.Errorf("cpu.registers.B = %X, expected = %X", cpu.registers.A, 0x03)
+			t.Errorf("cpu.registers.A = %X, expected = %X", cpu.registers.A, 0x03)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
-			t.Error("Zero flag must be reset")
+			t.Error("Zero flag must be disabled")
 		}
 
 		if (cpu.registers.F & negativeFlag) == negativeFlag {
-			t.Error("Negative flag must be reset")
+			t.Error("Negative flag must be disabled")
 		}
 
 		if (cpu.registers.F & halfCarryFlag) == halfCarryFlag {
-			t.Error("Half carry flag must be reset")
+			t.Error("Half carry flag must be disabled")
 		}
 
-		if (cpu.registers.F & carryFlag) == carryFlag {
-			t.Error("Carry flag must stay reset")
+		if (cpu.registers.F & carryFlag) != carryFlag {
+			t.Error("Carry flag must be enabled")
 		}
 	}
 }
@@ -906,6 +911,87 @@ func testRrcaApplyCarryAndResetCarryFlag(t *testing.T, cpu *cpu) func() {
 
 		if (cpu.registers.F & carryFlag) == carryFlag {
 			t.Error("Carry flag must be reset")
+		}
+	}
+}
+
+func testRla(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F = negativeFlag | zeroFlag | halfCarryFlag
+	cpu.registers.A = 0x81
+
+	return func() {
+		if cpu.registers.A != 0x02 {
+			t.Errorf("cpu.registers.A = %X, expected = %X", cpu.registers.A, 0x02)
+		}
+
+		if (cpu.registers.F & zeroFlag) == zeroFlag {
+			t.Error("Zero flag must be disabled")
+		}
+
+		if (cpu.registers.F & negativeFlag) == negativeFlag {
+			t.Error("Negative flag must be disabled")
+		}
+
+		if (cpu.registers.F & halfCarryFlag) == halfCarryFlag {
+			t.Error("Half carry flag must be disabled")
+		}
+
+		if (cpu.registers.F & carryFlag) != carryFlag {
+			t.Error("Carry flag must be enabled")
+		}
+	}
+}
+
+func testRlaApplyCarryAndResetCarryFlag(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F = zeroFlag | negativeFlag | halfCarryFlag | carryFlag
+	cpu.registers.A = 0x1
+
+	return func() {
+		if cpu.registers.A != 0x03 {
+			t.Errorf("cpu.registers.A = %X, expected = %X", cpu.registers.A, 0x03)
+		}
+
+		if (cpu.registers.F & zeroFlag) == zeroFlag {
+			t.Error("Zero flag must be disabled")
+		}
+
+		if (cpu.registers.F & negativeFlag) == negativeFlag {
+			t.Error("Negative flag must be disabled")
+		}
+
+		if (cpu.registers.F & halfCarryFlag) == halfCarryFlag {
+			t.Error("Half carry flag must be disabled")
+		}
+
+		if (cpu.registers.F & carryFlag) == carryFlag {
+			t.Error("Carry flag must stay disabled")
+		}
+	}
+}
+
+func testRlaApplyCarryAndEnableCarryFlag(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F = zeroFlag | negativeFlag | halfCarryFlag | carryFlag
+	cpu.registers.A = 0x81
+
+	return func() {
+		if cpu.registers.A != 0x03 {
+			t.Errorf("cpu.registers.A = %X, expected = %X", cpu.registers.A, 0x03)
+		}
+
+		if (cpu.registers.F & zeroFlag) == zeroFlag {
+			t.Error("Zero flag must be disabled")
+		}
+
+		if (cpu.registers.F & negativeFlag) == negativeFlag {
+			t.Error("Negative flag must be disabled")
+		}
+
+		if (cpu.registers.F & halfCarryFlag) == halfCarryFlag {
+			t.Error("Half carry flag must be disabled")
+		}
+
+		if (cpu.registers.F & carryFlag) != carryFlag {
+			t.Error("Carry flag must be enabled")
 		}
 	}
 }

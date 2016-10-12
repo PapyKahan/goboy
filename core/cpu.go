@@ -28,6 +28,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x16: &instruction{name: "LD D n", ticks: 8, length: 2, handler: handlerFunc(ldDn)},
 	0x17: &instruction{name: "RLA", ticks: 4, length: 1, handler: handlerFunc(rla)},
 	0x18: &instruction{name: "JR n", ticks: 12, length: 2, handler: handlerFunc(jrn)},
+	0x19: &instruction{name: "ADD HL DE", ticks: 8, length: 1, handler: handlerFunc(addHlDe)},
 }
 
 type cpu struct {
@@ -320,4 +321,10 @@ func rla(cpu *cpu, _ uint16) {
 
 func jrn(cpu *cpu, value uint16) {
 	cpu.relativeJump(byte(value & 0x00FF))
+}
+
+func addHlDe(cpu *cpu, value uint16) {
+	hl := cpu.registers.readHL()
+	de := cpu.registers.readDE()
+	cpu.registers.writeHL(cpu.addWord(hl, de))
 }

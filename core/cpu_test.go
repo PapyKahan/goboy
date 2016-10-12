@@ -249,7 +249,7 @@ func testLdDepA(t *testing.T, cpu *cpu) func() {
 
 func testLdDn(t *testing.T, cpu *cpu) func() {
 	cpu.mmu.writeByte(romBank00BaseAddress+1, 0x6)
-	cpu.registers.B = 0x00
+	cpu.registers.D = 0x00
 
 	return func() {
 		if cpu.registers.D != 0x06 {

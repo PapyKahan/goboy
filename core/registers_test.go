@@ -47,3 +47,27 @@ func TestWriteHL(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestReadDE(t *testing.T) {
+	r := registers{}
+	r.D = 0xF0
+	r.E = 0xFF
+	value := r.readDE()
+	if value != 0xF0FF {
+		t.Errorf("ReadDE value = 0x%X, expected = 0x%X", value, 0xF0FF)
+	}
+}
+
+func TestWriteDE(t *testing.T) {
+	r := registers{}
+	r.writeDE(0xFF0F)
+
+	if r.D != 0xFF {
+		t.Errorf("registers.D = 0x%X, expected = 0x%X", r.D, 0xFF)
+
+	}
+
+	if r.E != 0x0F {
+		t.Errorf("registers.E = %X, expected = %X", r.E, 0x0F)
+	}
+}

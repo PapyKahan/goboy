@@ -13,7 +13,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x07: &instruction{name: "RLCA", ticks: 4, length: 1, handler: handlerFunc(rlca)},
 	0x08: &instruction{name: "LD (nn) SP", ticks: 20, length: 3, handler: handlerFunc(ldNnpSp)},
 	0x09: &instruction{name: "ADD HL BC", ticks: 8, length: 1, handler: handlerFunc(addHlBc)},
-	0x0A: &instruction{name: "LD A, (BC)", ticks: 8, length: 1, handler: handlerFunc(ldABcp)},
+	0x0A: &instruction{name: "LD A (BC)", ticks: 8, length: 1, handler: handlerFunc(ldABcp)},
 	0x0B: &instruction{name: "DEC BC", ticks: 8, length: 1, handler: handlerFunc(decBc)},
 	0x0C: &instruction{name: "INC C", ticks: 4, length: 1, handler: handlerFunc(incC)},
 	0x0D: &instruction{name: "DEC C", ticks: 4, length: 1, handler: handlerFunc(decC)},
@@ -29,6 +29,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x17: &instruction{name: "RLA", ticks: 4, length: 1, handler: handlerFunc(rla)},
 	0x18: &instruction{name: "JR n", ticks: 12, length: 2, handler: handlerFunc(jrn)},
 	0x19: &instruction{name: "ADD HL DE", ticks: 8, length: 1, handler: handlerFunc(addHlDe)},
+	0x1A: &instruction{name: "LD A (DE)", ticks: 8, length: 1, handler: handlerFunc(ldADep)},
 }
 
 type cpu struct {
@@ -327,4 +328,8 @@ func addHlDe(cpu *cpu, value uint16) {
 	hl := cpu.registers.readHL()
 	de := cpu.registers.readDE()
 	cpu.registers.writeHL(cpu.addWord(hl, de))
+}
+
+func ldADep(cpu *cpu, address uint16) {
+	cpu.registers.A = cpu.mmu.readByte(cpu.registers.readDE())
 }

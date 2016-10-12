@@ -22,6 +22,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x10: &instruction{name: "STOP", ticks: 4, length: 2, handler: handlerFunc(stop)},
 	0x11: &instruction{name: "LD DE nn", ticks: 12, length: 3, handler: handlerFunc(ldDeNn)},
 	0x12: &instruction{name: "LD (DE) A", ticks: 8, length: 1, handler: handlerFunc(ldDepA)},
+	0x13: &instruction{name: "INC DE", ticks: 8, length: 1, handler: handlerFunc(ldIncDe)},
 }
 
 type cpu struct {
@@ -235,4 +236,10 @@ func ldDeNn(cpu *cpu, value uint16) {
 
 func ldDepA(cpu *cpu, _ uint16) {
 	cpu.mmu.writeByte(cpu.registers.readDE(), cpu.registers.A)
+}
+
+func ldIncDe(cpu *cpu, _ uint16) {
+	de := cpu.registers.readDE()
+	de++
+	cpu.registers.writeDE(de)
 }

@@ -26,6 +26,7 @@ func Test16BitsArithmeticLogicalInstructions(t *testing.T) {
 	t.Run("INC BC overflow", noFlagModificationInstructionTestHandler(testIncBcOverflow, 0x03))
 	t.Run("ADD HL, BC", instructionTestHandler(testAddHlBc, 0x09))
 	t.Run("DEC BC", noFlagModificationInstructionTestHandler(testDecBc, 0x0B))
+	t.Run("DEC BC underflow", noFlagModificationInstructionTestHandler(testDecBcUnderflow, 0x0B))
 	t.Run("INC DE", noFlagModificationInstructionTestHandler(testIncDe, 0x13))
 	t.Run("INC DE overflow", noFlagModificationInstructionTestHandler(testIncDeOverflow, 0x13))
 }
@@ -304,7 +305,18 @@ func testDecBc(t *testing.T, cpu *cpu) func() {
 	return func() {
 		value := cpu.registers.readBC()
 		if value != 0x0 {
-			t.Errorf("cpu.registers.BC = %X, expected = %X", value, 0x0)
+			t.Errorf("cpu.registers.BC = 0x%X, expected = 0x%X", value, 0x0)
+		}
+	}
+}
+
+func testDecBcUnderflow(t *testing.T, cpu *cpu) func() {
+	cpu.registers.writeBC(0x0)
+
+	return func() {
+		value := cpu.registers.readBC()
+		if value != 0xFFFF {
+			t.Errorf("cpu.registers.BC = 0x%X, expected = 0x%X", value, 0xFFFF)
 		}
 	}
 }

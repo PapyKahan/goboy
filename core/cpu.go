@@ -26,6 +26,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x14: &instruction{name: "INC D", ticks: 4, length: 1, handler: handlerFunc(incD)},
 	0x15: &instruction{name: "DEC D", ticks: 4, length: 1, handler: handlerFunc(decD)},
 	0x16: &instruction{name: "LD D n", ticks: 8, length: 2, handler: handlerFunc(ldDn)},
+	0x17: &instruction{name: "RLA", ticks: 4, length: 1, handler: handlerFunc(rla)},
 }
 
 type cpu struct {
@@ -70,19 +71,39 @@ func (cpu *cpu) next() error {
 }
 
 func (cpu *cpu) aluRotateLeftCarry(value byte) byte {
-	carry := (value & 0x80) >> 7
+	carry := (value & 0x80) == 0x80
+
 	value <<= 1
-	if (cpu.registers.F & carryFlag) == carryFlag {
+	if carry {
 		value++
 	}
 
-	if carry == 1 {
+	if carry {
 		cpu.registers.F |= carryFlag
 	} else {
 		cpu.registers.F &^= carryFlag
 	}
 
 	cpu.registers.F &^= negativeFlag | zeroFlag | halfCarryFlag
+
+	return value
+}
+
+func (cpu *cpu) aluRotateLeft(value byte) byte {
+	carry := cpu.registers.F&carryFlag == carryFlag
+
+	if value&0x80 == 0x80 {
+		cpu.registers.F |= carryFlag
+	} else {
+		cpu.registers.F &^= carryFlag
+	}
+
+	value <<= 1
+	if carry {
+		value++
+	}
+
+	cpu.registers.F &^= zeroFlag | negativeFlag | halfCarryFlag
 
 	return value
 }
@@ -257,4 +278,8 @@ func decD(cpu *cpu, _ uint16) {
 
 func ldDn(cpu *cpu, value uint16) {
 	cpu.registers.D = byte(value & 0x00FF)
+}
+
+func rla(cpu *cpu, _ uint16) {
+	cpu.registers.A = cpu.aluRotateLeft(cpu.registers.A)
 }

@@ -67,6 +67,7 @@ func Test8bitRotationsshiftsAndBitInstructions(t *testing.T) {
 
 func TestJumpCalls(t *testing.T) {
 	t.Run("JR n", noFlagModificationInstructionTestHandler(testJr, 0x18))
+	t.Run("JR n negative value", noFlagModificationInstructionTestHandler(testJrNegativeValue, 0x18))
 }
 
 func instructionTestHandler(test instructionTestFunction, opcode byte) func(t *testing.T) {
@@ -1005,6 +1006,18 @@ func testJr(t *testing.T, cpu *cpu) func() {
 			t.Errorf("cpu.registers.pc = %0#4X, expected = %0#4X", cpu.registers.pc, 0x000A)
 		} else {
 			cpu.registers.pc -= 0x8
+		}
+	}
+}
+
+func testJrNegativeValue(t *testing.T, cpu *cpu) func() {
+	cpu.mmu.writeByte(romBank00BaseAddress+1, 0xF1) // -15
+
+	return func() {
+		if cpu.registers.pc != 0xFFF3 {
+			t.Errorf("cpu.registers.pc = %0#4X, expected = %0#4X", cpu.registers.pc, 0xFFF3)
+		} else {
+			cpu.registers.pc += 15
 		}
 	}
 }

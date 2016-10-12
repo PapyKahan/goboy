@@ -23,6 +23,7 @@ func TestLoadMoveStoreInstructions(t *testing.T) {
 
 func Test16BitsArithmeticLogicalInstructions(t *testing.T) {
 	t.Run("INC BC", noFlagModificationInstructionTestHandler(testIncBc, 0x03))
+	t.Run("INC BC overflow", noFlagModificationInstructionTestHandler(testIncBcOverflow, 0x03))
 	t.Run("ADD HL, BC", instructionTestHandler(testAddHlBc, 0x09))
 	t.Run("DEC BC", noFlagModificationInstructionTestHandler(testDecBc, 0x0B))
 	t.Run("INC DE", noFlagModificationInstructionTestHandler(testIncDe, 0x13))
@@ -247,6 +248,20 @@ func testIncBc(t *testing.T, cpu *cpu) func() {
 
 		if cpu.registers.C != 0x02 {
 			t.Errorf("cpu.registers.C = %X, expected = %X", cpu.registers.C, 0x02)
+		}
+	}
+}
+
+func testIncBcOverflow(t *testing.T, cpu *cpu) func() {
+	cpu.registers.writeBC(0xFFFF)
+
+	return func() {
+		if cpu.registers.B != 0x0 {
+			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0x00)
+		}
+
+		if cpu.registers.C != 0x0 {
+			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0x00)
 		}
 	}
 }

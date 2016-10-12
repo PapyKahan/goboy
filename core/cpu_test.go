@@ -45,8 +45,11 @@ func Test8BitsArithmeticLogicalInstructions(t *testing.T) {
 	t.Run("DEC C zero flag", instructionTestHandler(testDecCZeroFlag, 0x0D))
 	t.Run("DEC C underflow", instructionTestHandler(testDecCUnderflow, 0x0D))
 
-	t.Run("INC C", instructionTestHandler(testIncD, 0x14))
-	t.Run("INC C register overflow and half carry flag trigger", instructionTestHandler(testIncDOverflowAndHalfCarry, 0x14))
+	t.Run("INC D", instructionTestHandler(testIncD, 0x14))
+	t.Run("INC D register overflow and half carry flag trigger", instructionTestHandler(testIncDOverflowAndHalfCarry, 0x14))
+	t.Run("DEC D", instructionTestHandler(testDecD, 0x15))
+	t.Run("DEC D zero flag", instructionTestHandler(testDecDZeroFlag, 0x15))
+	t.Run("DEC D underflow", instructionTestHandler(testDecDUnderflow, 0x15))
 }
 
 func Test8bitRotationsshiftsAndBitInstructions(t *testing.T) {
@@ -702,6 +705,87 @@ func testIncDOverflowAndHalfCarry(t *testing.T, cpu *cpu) func() {
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
 			t.Error("Carry flag must stay untouched")
+		}
+	}
+}
+
+func testDecD(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F = zeroFlag | negativeFlag | carryFlag | halfCarryFlag
+	cpu.registers.D = 0x1
+
+	return func() {
+		if cpu.registers.D != 0x0 {
+			t.Errorf("cpu.registers.D = %X, expected = %X", cpu.registers.D, 0x0)
+		}
+
+		if (cpu.registers.F & zeroFlag) != zeroFlag {
+			t.Error("Zero flag must be enabled")
+		}
+
+		if (cpu.registers.F & negativeFlag) != negativeFlag {
+			t.Error("Negative flag must be enabled")
+		}
+
+		if (cpu.registers.F & halfCarryFlag) != halfCarryFlag {
+			t.Error("Half carry flag must be enabled")
+		}
+
+		if (cpu.registers.F & carryFlag) != carryFlag {
+			t.Error("Carry flag must be enabled")
+		}
+	}
+}
+
+func testDecDZeroFlag(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F = zeroFlag | negativeFlag | carryFlag | halfCarryFlag
+	cpu.registers.D = 0x01
+
+	return func() {
+		if cpu.registers.D != 0x0 {
+			t.Errorf("cpu.registers.D = %X, expected = %X", cpu.registers.D, 0x0)
+		}
+
+		if (cpu.registers.F & zeroFlag) != zeroFlag {
+			t.Error("Zero flag must be enabled")
+		}
+
+		if (cpu.registers.F & negativeFlag) != negativeFlag {
+			t.Error("Negative flag must be enabled")
+		}
+
+		if (cpu.registers.F & halfCarryFlag) != halfCarryFlag {
+			t.Error("Half carry flag must be enabled")
+		}
+
+		if (cpu.registers.F & carryFlag) != carryFlag {
+			t.Error("Carry flag must be enabled")
+		}
+	}
+}
+
+func testDecDUnderflow(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F = zeroFlag | negativeFlag | carryFlag | halfCarryFlag
+	cpu.registers.D = 0x0
+
+	return func() {
+		if cpu.registers.D != 0xFF {
+			t.Errorf("cpu.registers.D = %X, expected = %X", cpu.registers.D, 0xFF)
+		}
+
+		if (cpu.registers.F & zeroFlag) == zeroFlag {
+			t.Error("Zero flag must be reset")
+		}
+
+		if (cpu.registers.F & negativeFlag) != negativeFlag {
+			t.Error("Negative flag must be enabled")
+		}
+
+		if (cpu.registers.F & halfCarryFlag) == halfCarryFlag {
+			t.Error("Half carry flag must be reset")
+		}
+
+		if (cpu.registers.F & carryFlag) != carryFlag {
+			t.Errorf("Carry flag must be enabled")
 		}
 	}
 }

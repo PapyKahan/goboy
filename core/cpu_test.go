@@ -25,6 +25,7 @@ func Test16BitsArithmeticLogicalInstructions(t *testing.T) {
 	t.Run("INC BC", noFlagModificationInstructionTestHandler(testIncBc, 0x03))
 	t.Run("INC BC overflow", noFlagModificationInstructionTestHandler(testIncBcOverflow, 0x03))
 	t.Run("ADD HL, BC", instructionTestHandler(testAddHlBc, 0x09))
+	t.Run("ADD HL, BC carry and half carry flags trigger", instructionTestHandler(testAddHlBcCarryAndHalfCarry, 0x09))
 	t.Run("DEC BC", noFlagModificationInstructionTestHandler(testDecBc, 0x0B))
 	t.Run("DEC BC underflow", noFlagModificationInstructionTestHandler(testDecBcUnderflow, 0x0B))
 	t.Run("INC DE", noFlagModificationInstructionTestHandler(testIncDe, 0x13))
@@ -270,6 +271,36 @@ func testIncBcOverflow(t *testing.T, cpu *cpu) func() {
 func testAddHlBc(t *testing.T, cpu *cpu) func() {
 	cpu.registers.F = negativeFlag | zeroFlag
 
+	cpu.registers.writeBC(0x0003)
+	cpu.registers.writeHL(0x0200)
+
+	return func() {
+		value := cpu.registers.readHL()
+		if value != 0x0203 {
+			t.Errorf("HL register value = 0x%X, expected = 0x%X", value, 0x0203)
+		}
+
+		if (cpu.registers.F & zeroFlag) != zeroFlag {
+			t.Error("Zero flag must be enabled")
+		}
+
+		if (cpu.registers.F & negativeFlag) == negativeFlag {
+			t.Error("Negative flag must be reset")
+		}
+
+		if (cpu.registers.F & halfCarryFlag) == halfCarryFlag {
+			t.Error("Half carry flag must be disabled")
+		}
+
+		if (cpu.registers.F & carryFlag) == carryFlag {
+			t.Error("Carry flag must be disabled")
+		}
+	}
+}
+
+func testAddHlBcCarryAndHalfCarry(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F = negativeFlag | zeroFlag
+
 	//   0100 0100 0000 0000
 	// + 1100 1100 0000 0000
 	cpu.registers.writeBC(0x4400)
@@ -277,8 +308,8 @@ func testAddHlBc(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		value := cpu.registers.readHL()
-		if value != 4096 {
-			t.Errorf("HL register value = %d, expected = %d", value, 4096)
+		if value != 0x1000 {
+			t.Errorf("HL register value = %d, expected = %d", value, 0x1000)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {

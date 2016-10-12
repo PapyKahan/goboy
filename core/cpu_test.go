@@ -65,21 +65,24 @@ func Test8bitRotationsshiftsAndBitInstructions(t *testing.T) {
 	t.Run("RLA apply carry and enable carry flag", instructionTestHandler(testRlaApplyCarryAndEnableCarryFlag, 0x17))
 }
 
+func TestJumpCalls(t *testing.T) {
+	t.Run("JR n", noFlagModificationInstructionTestHandler(testJr, 0x18))
+}
+
 func instructionTestHandler(test instructionTestFunction, opcode byte) func(t *testing.T) {
 	return func(t *testing.T) {
 		system := New()
 		system.cpu.registers.pc = romBank00BaseAddress
 		system.cpu.mmu.writeByte(romBank00BaseAddress, opcode)
 
-		instruction := (*system.cpu.instructionSet)[int(opcode)]
 		postExecuteCheck := test(t, system.cpu)
-
 		system.Execute()
+		postExecuteCheck()
 
+		instruction := (*system.cpu.instructionSet)[int(opcode)]
 		if system.cpu.registers.pc != uint16(instruction.length) {
 			t.Errorf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
 		}
-		postExecuteCheck()
 	}
 }
 
@@ -90,16 +93,14 @@ func noFlagModificationInstructionTestHandler(test instructionTestFunction, opco
 		system.cpu.mmu.writeByte(romBank00BaseAddress, opcode)
 		system.cpu.registers.F = zeroFlag | negativeFlag | halfCarryFlag | carryFlag
 
-		instruction := (*system.cpu.instructionSet)[int(opcode)]
 		postExecuteCheck := test(t, system.cpu)
-
 		system.Execute()
+		postExecuteCheck()
 
+		instruction := (*system.cpu.instructionSet)[int(opcode)]
 		if system.cpu.registers.pc != uint16(instruction.length) {
 			t.Errorf("system.cpu.ProgramCounter = %d, expected = %d", system.cpu.registers.pc, instruction.length)
 		}
-
-		postExecuteCheck()
 
 		if system.cpu.registers.F&zeroFlag == 0x0 {
 			t.Error("Zero flag must stay untouched")
@@ -141,7 +142,7 @@ func testStopIncBc(t *testing.T, cpu *cpu) func() {
 
 		var value = cpu.registers.readBC()
 		if value != 0xBC {
-			t.Errorf("system.cpu.registers.BC = 0x%X, Expected value 0x%X", value, 0xBC)
+			t.Errorf("system.cpu.registers.BC = %0#2X, Expected value %0#2X", value, 0xBC)
 		}
 
 		if cpu.registers.pc != previousProgramCounter {
@@ -156,11 +157,11 @@ func testLdBcNn(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0xFF {
-			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0xFF)
+			t.Errorf("cpu.registers.B = %0#2X, expected = %0#2X", cpu.registers.B, 0xFF)
 		}
 
 		if cpu.registers.C != 0x0F {
-			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0x0F)
+			t.Errorf("cpu.registers.C = %0#2X, expected = %0#2X", cpu.registers.C, 0x0F)
 		}
 	}
 }
@@ -173,7 +174,7 @@ func testLdBcpA(t *testing.T, cpu *cpu) func() {
 	return func() {
 		value := cpu.mmu.readByte(workRAMBank0BaseAddress)
 		if value != 0xF0 {
-			t.Errorf("cpu.mmu.memory[0x%X] = 0x%X, expected = 0x%X", workRAMBank0BaseAddress, value, 0xF0)
+			t.Errorf("cpu.mmu.memory[%0#4X] = %0#2X, expected = %0#2X", workRAMBank0BaseAddress, value, 0xF0)
 		}
 	}
 }
@@ -184,7 +185,7 @@ func testLdBn(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0x06 {
-			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0x06)
+			t.Errorf("cpu.registers.B = %0#2X, expected = %0#2X", cpu.registers.B, 0x06)
 		}
 	}
 }
@@ -196,7 +197,7 @@ func testLdNnpSp(t *testing.T, cpu *cpu) func() {
 	return func() {
 		value := cpu.mmu.readWord(workRAMBank0BaseAddress)
 		if value != 0xF0FF {
-			t.Errorf("(%X) address value =0x %X, expected = 0x%X", workRAMBank0BaseAddress, value, 0xF0FF)
+			t.Errorf("(%0#4X) address value =%0#4X, expected = %0#4X", workRAMBank0BaseAddress, value, 0xF0FF)
 		}
 	}
 }
@@ -208,7 +209,7 @@ func testLdABcp(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.A != 0x0F {
-			t.Errorf("cpu.registers.A = 0x%X, expected = 0x%X", cpu.registers.A, 0x0F)
+			t.Errorf("cpu.registers.A = %0#2X, expected = %0#2X", cpu.registers.A, 0x0F)
 		}
 	}
 }
@@ -219,7 +220,7 @@ func testLdCN(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.C != 0xE {
-			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0xE)
+			t.Errorf("cpu.registers.C = %0#2X, expected = %0#2X", cpu.registers.C, 0xE)
 		}
 	}
 }
@@ -230,11 +231,11 @@ func testLdDeNn(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.D != 0xF0 {
-			t.Errorf("cpu.registers.D = 0x%X, expected = 0x%X", cpu.registers.D, 0xF0)
+			t.Errorf("cpu.registers.D = %0#2X, expected = %0#2X", cpu.registers.D, 0xF0)
 		}
 
 		if cpu.registers.E != 0xFF {
-			t.Errorf("cpu.registers.E = 0x%X, expected = 0x%X", cpu.registers.E, 0xFF)
+			t.Errorf("cpu.registers.E = %0#2X, expected = %0#2X", cpu.registers.E, 0xFF)
 		}
 	}
 }
@@ -247,7 +248,7 @@ func testLdDepA(t *testing.T, cpu *cpu) func() {
 	return func() {
 		value := cpu.mmu.readByte(workRAMBank0BaseAddress)
 		if value != 0xFF {
-			t.Errorf("cpu.mmu.memory[0x%X] = 0x%X, expected = 0x%X", workRAMBank0BaseAddress, value, 0xFF)
+			t.Errorf("cpu.mmu.memory[%0#4X] = %0#2X, expected = %0#2X", workRAMBank0BaseAddress, value, 0xFF)
 		}
 	}
 }
@@ -258,7 +259,7 @@ func testLdDn(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.D != 0x06 {
-			t.Errorf("cpu.registers.D = 0x%X, expected = 0x%X", cpu.registers.D, 0x06)
+			t.Errorf("cpu.registers.D = %0#2X, expected = %0#2X", cpu.registers.D, 0x06)
 		}
 	}
 }
@@ -268,11 +269,11 @@ func testIncBc(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0x01 {
-			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0x01)
+			t.Errorf("cpu.registers.B = %0#2X, expected = %0#2X", cpu.registers.B, 0x01)
 		}
 
 		if cpu.registers.C != 0x02 {
-			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0x02)
+			t.Errorf("cpu.registers.C = %0#2X, expected = %0#2X", cpu.registers.C, 0x02)
 		}
 	}
 }
@@ -282,11 +283,11 @@ func testIncBcOverflow(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0x0 {
-			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0x00)
+			t.Errorf("cpu.registers.B = %0#2X, expected = %0#2X", cpu.registers.B, 0x00)
 		}
 
 		if cpu.registers.C != 0x0 {
-			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0x00)
+			t.Errorf("cpu.registers.C = %0#2X, expected = %0#2X", cpu.registers.C, 0x00)
 		}
 	}
 }
@@ -300,7 +301,7 @@ func testAddHlBc(t *testing.T, cpu *cpu) func() {
 	return func() {
 		value := cpu.registers.readHL()
 		if value != 0x0203 {
-			t.Errorf("HL register value = 0x%X, expected = 0x%X", value, 0x0203)
+			t.Errorf("HL register value = %0#4X, expected = %0#4X", value, 0x0203)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -332,7 +333,7 @@ func testAddHlBcCarryAndHalfCarryEnable(t *testing.T, cpu *cpu) func() {
 	return func() {
 		value := cpu.registers.readHL()
 		if value != 0x1000 {
-			t.Errorf("HL register value = 0x%X, expected = 0x%X", value, 0x1000)
+			t.Errorf("HL register value = %0#4X, expected = %0#4X", value, 0x1000)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -359,7 +360,7 @@ func testDecBc(t *testing.T, cpu *cpu) func() {
 	return func() {
 		value := cpu.registers.readBC()
 		if value != 0x0 {
-			t.Errorf("cpu.registers.BC = 0x%X, expected = 0x%X", value, 0x0)
+			t.Errorf("cpu.registers.BC = %0#4X, expected = %0#4X", value, 0x0)
 		}
 	}
 }
@@ -370,7 +371,7 @@ func testDecBcUnderflow(t *testing.T, cpu *cpu) func() {
 	return func() {
 		value := cpu.registers.readBC()
 		if value != 0xFFFF {
-			t.Errorf("cpu.registers.BC = 0x%X, expected = 0x%X", value, 0xFFFF)
+			t.Errorf("cpu.registers.BC = %0#4X, expected = %0#4X", value, 0xFFFF)
 		}
 	}
 }
@@ -380,11 +381,11 @@ func testIncDe(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.D != 0x01 {
-			t.Errorf("cpu.registers.D = 0x%X, expected = 0x%X", cpu.registers.D, 0x01)
+			t.Errorf("cpu.registers.D = %0#2X, expected = %0#2X", cpu.registers.D, 0x01)
 		}
 
 		if cpu.registers.E != 0x02 {
-			t.Errorf("cpu.registers.E = 0x%X, expected = 0x%X", cpu.registers.E, 0x02)
+			t.Errorf("cpu.registers.E = %0#2X, expected = %0#2X", cpu.registers.E, 0x02)
 		}
 	}
 }
@@ -394,11 +395,11 @@ func testIncDeOverflow(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.D != 0x00 {
-			t.Errorf("cpu.registers.D = 0x%X, expected = 0x%X", cpu.registers.D, 0x00)
+			t.Errorf("cpu.registers.D = %0#2X, expected = %0#2X", cpu.registers.D, 0x00)
 		}
 
 		if cpu.registers.E != 0x00 {
-			t.Errorf("cpu.registers.E = 0x%X, expected = 0x%X", cpu.registers.E, 0x00)
+			t.Errorf("cpu.registers.E = %0#2X, expected = %0#2X", cpu.registers.E, 0x00)
 		}
 	}
 }
@@ -409,7 +410,7 @@ func testIncB(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0x10 {
-			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0x010)
+			t.Errorf("cpu.registers.B = %0#2X, expected = %0#2X", cpu.registers.B, 0x010)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -436,7 +437,7 @@ func testIncBOverflowAndHalfCarry(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0x00 {
-			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0x0)
+			t.Errorf("cpu.registers.B = %0#2X, expected = %0#2X", cpu.registers.B, 0x0)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -463,7 +464,7 @@ func testDecB(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0x0E {
-			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0x0E)
+			t.Errorf("cpu.registers.B = %0#2X, expected = %0#2X", cpu.registers.B, 0x0E)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -490,7 +491,7 @@ func testDecBZeroFlag(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0x0 {
-			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0x0)
+			t.Errorf("cpu.registers.B = %0#2X, expected = %0#2X", cpu.registers.B, 0x0)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -517,7 +518,7 @@ func testDecBUnderflow(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0xFF {
-			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0xFF)
+			t.Errorf("cpu.registers.B = %0#2X, expected = %0#2X", cpu.registers.B, 0xFF)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -543,7 +544,7 @@ func testIncC(t *testing.T, cpu *cpu) func() {
 	cpu.registers.F = zeroFlag | negativeFlag | carryFlag
 	return func() {
 		if cpu.registers.C != 0x2 {
-			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0x2)
+			t.Errorf("cpu.registers.C = %0#2X, expected = %0#2X", cpu.registers.C, 0x2)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -570,7 +571,7 @@ func testIncCOverflowAndHalfCarry(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.C != 0x0 {
-			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0x0)
+			t.Errorf("cpu.registers.C = %0#2X, expected = %0#2X", cpu.registers.C, 0x0)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -597,7 +598,7 @@ func testDecC(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.C != 0x0 {
-			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0x0)
+			t.Errorf("cpu.registers.C = %0#2X, expected = %0#2X", cpu.registers.C, 0x0)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -624,7 +625,7 @@ func testDecCZeroFlag(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.C != 0x0 {
-			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0x0)
+			t.Errorf("cpu.registers.C = %0#2X, expected = %0#2X", cpu.registers.C, 0x0)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -651,7 +652,7 @@ func testDecCUnderflow(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.C != 0xFF {
-			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0xFF)
+			t.Errorf("cpu.registers.C = %0#2X, expected = %0#2X", cpu.registers.C, 0xFF)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -678,7 +679,7 @@ func testIncD(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.D != 0x10 {
-			t.Errorf("cpu.registers.D = 0x%X, expected = 0x%X", cpu.registers.D, 0x010)
+			t.Errorf("cpu.registers.D = %0#2X, expected = %0#2X", cpu.registers.D, 0x010)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -705,7 +706,7 @@ func testIncDOverflowAndHalfCarry(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.D != 0x00 {
-			t.Errorf("cpu.registers.D = 0x%X, expected = 0x%X", cpu.registers.D, 0x0)
+			t.Errorf("cpu.registers.D = %0#2X, expected = %0#2X", cpu.registers.D, 0x0)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -732,7 +733,7 @@ func testDecD(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.D != 0x0 {
-			t.Errorf("cpu.registers.D = 0x%X, expected = 0x%X", cpu.registers.D, 0x0)
+			t.Errorf("cpu.registers.D = %0#2X, expected = %0#2X", cpu.registers.D, 0x0)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -759,7 +760,7 @@ func testDecDZeroFlag(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.D != 0x0 {
-			t.Errorf("cpu.registers.D = 0x%X, expected = 0x%X", cpu.registers.D, 0x0)
+			t.Errorf("cpu.registers.D = %0#2X, expected = %0#2X", cpu.registers.D, 0x0)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -786,7 +787,7 @@ func testDecDUnderflow(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.D != 0xFF {
-			t.Errorf("cpu.registers.D = 0x%X, expected = 0x%X", cpu.registers.D, 0xFF)
+			t.Errorf("cpu.registers.D = %0#2X, expected = %0#2X", cpu.registers.D, 0xFF)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -813,7 +814,7 @@ func testRlca(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.A != 0x02 {
-			t.Errorf("cpu.registers.A = 0x%X, expected = 0x%X", cpu.registers.A, 0x02)
+			t.Errorf("cpu.registers.A = %0#2X, expected = %0#2X", cpu.registers.A, 0x02)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -840,7 +841,7 @@ func testRlcaApplyCarryAndEnableCarryFlag(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.A != 0x03 {
-			t.Errorf("cpu.registers.A = 0x%X, expected = 0x%X", cpu.registers.A, 0x03)
+			t.Errorf("cpu.registers.A = %0#2X, expected = %0#2X", cpu.registers.A, 0x03)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -867,7 +868,7 @@ func testRrca(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.A != 0x82 {
-			t.Errorf("cpu.registers.A = 0x%X, expected = 0x%X", cpu.registers.A, 0x82)
+			t.Errorf("cpu.registers.A = %0#2X, expected = %0#2X", cpu.registers.A, 0x82)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -894,7 +895,7 @@ func testRrcaDisableCarryFlag(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.A != 0x01 {
-			t.Errorf("cpu.registers.A = 0x%X, expected = 0x%X", cpu.registers.A, 0x01)
+			t.Errorf("cpu.registers.A = %0#2X, expected = %0#2X", cpu.registers.A, 0x01)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -921,7 +922,7 @@ func testRla(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.A != 0x02 {
-			t.Errorf("cpu.registers.A = 0x%X, expected = 0x%X", cpu.registers.A, 0x02)
+			t.Errorf("cpu.registers.A = %0#2X, expected = %0#2X", cpu.registers.A, 0x02)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -948,7 +949,7 @@ func testRlaApplyCarryAndDisableCarryFlag(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.A != 0x03 {
-			t.Errorf("cpu.registers.A = 0x%X, expected = 0x%X", cpu.registers.A, 0x03)
+			t.Errorf("cpu.registers.A = %0#2X, expected = %0#2X", cpu.registers.A, 0x03)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -975,7 +976,7 @@ func testRlaApplyCarryAndEnableCarryFlag(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.A != 0x03 {
-			t.Errorf("cpu.registers.A = 0x%X, expected = 0x%X", cpu.registers.A, 0x03)
+			t.Errorf("cpu.registers.A = %0#2X, expected = %0#2X", cpu.registers.A, 0x03)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -992,6 +993,18 @@ func testRlaApplyCarryAndEnableCarryFlag(t *testing.T, cpu *cpu) func() {
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
 			t.Error("Carry flag must be enabled")
+		}
+	}
+}
+
+func testJr(t *testing.T, cpu *cpu) func() {
+	cpu.mmu.writeByte(romBank00BaseAddress+1, 0x8)
+
+	return func() {
+		if cpu.registers.pc != 0x000A {
+			t.Errorf("cpu.registers.pc = %0#4X, expected = %0#4X", cpu.registers.pc, 0x000A)
+		} else {
+			cpu.registers.pc -= 0x8
 		}
 	}
 }

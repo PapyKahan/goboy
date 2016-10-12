@@ -27,6 +27,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x15: &instruction{name: "DEC D", ticks: 4, length: 1, handler: handlerFunc(decD)},
 	0x16: &instruction{name: "LD D n", ticks: 8, length: 2, handler: handlerFunc(ldDn)},
 	0x17: &instruction{name: "RLA", ticks: 4, length: 1, handler: handlerFunc(rla)},
+	0x18: &instruction{name: "JR n", ticks: 12, length: 2, handler: handlerFunc(jrn)},
 }
 
 type cpu struct {
@@ -199,6 +200,16 @@ func (cpu *cpu) addWord(a uint16, b uint16) uint16 {
 	return a + b
 }
 
+func (cpu *cpu) relativeJump(value byte) {
+	if value&0x80 == 0x80 {
+		value--
+		value = ^value
+		cpu.registers.pc -= uint16(value)
+	} else {
+		cpu.registers.pc += uint16(value)
+	}
+}
+
 // Instructions implementation :
 
 func nop(cpu *cpu, _ uint16) {
@@ -305,4 +316,8 @@ func ldDn(cpu *cpu, value uint16) {
 func rla(cpu *cpu, _ uint16) {
 	cpu.registers.A = cpu.rotateLeft(cpu.registers.A)
 	cpu.registers.F &^= zeroFlag
+}
+
+func jrn(cpu *cpu, value uint16) {
+	cpu.relativeJump(byte(value & 0x00FF))
 }

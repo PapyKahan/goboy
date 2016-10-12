@@ -40,3 +40,12 @@ func (registers *registers) writeHL(value uint16) {
 	registers.H = byte(value >> 8)
 	registers.L = byte(value & 0x00FF)
 }
+
+func (registers *registers) writeDE(value uint16) {
+	registers.D = byte(value >> 8)
+	registers.E = byte(value & 0x00FF)
+}
+
+func (registers *registers) readDE() uint16 {
+	return uint16(registers.D)<<8 + uint16(registers.E)
+}

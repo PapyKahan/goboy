@@ -26,7 +26,7 @@ func Test16BitsArithmeticLogicalInstructions(t *testing.T) {
 	t.Run("INC BC", noFlagModificationInstructionTestHandler(testIncBc, 0x03))
 	t.Run("INC BC overflow", noFlagModificationInstructionTestHandler(testIncBcOverflow, 0x03))
 	t.Run("ADD HL, BC", instructionTestHandler(testAddHlBc, 0x09))
-	t.Run("ADD HL, BC carry and half carry flags trigger", instructionTestHandler(testAddHlBcCarryAndHalfCarry, 0x09))
+	t.Run("ADD HL, BC carry and half carry flags trigger", instructionTestHandler(testAddHlBcCarryAndHalfCarryEnable, 0x09))
 	t.Run("DEC BC", noFlagModificationInstructionTestHandler(testDecBc, 0x0B))
 	t.Run("DEC BC underflow", noFlagModificationInstructionTestHandler(testDecBcUnderflow, 0x0B))
 	t.Run("INC DE", noFlagModificationInstructionTestHandler(testIncDe, 0x13))
@@ -156,11 +156,11 @@ func testLdBcNn(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0xFF {
-			t.Errorf("cpu.registers.B = %X, expected = %X", cpu.registers.B, 0xFF)
+			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0xFF)
 		}
 
 		if cpu.registers.C != 0x0F {
-			t.Errorf("cpu.registers.C = %X, expected = %X", cpu.registers.C, 0x0F)
+			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0x0F)
 		}
 	}
 }
@@ -184,7 +184,7 @@ func testLdBn(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0x06 {
-			t.Errorf("cpu.registers.B = %X, expected = %X", cpu.registers.B, 0x06)
+			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0x06)
 		}
 	}
 }
@@ -196,7 +196,7 @@ func testLdNnpSp(t *testing.T, cpu *cpu) func() {
 	return func() {
 		value := cpu.mmu.readWord(workRAMBank0BaseAddress)
 		if value != 0xF0FF {
-			t.Errorf("(%X) address value = %X, expected = %X", workRAMBank0BaseAddress, value, 0xF0FF)
+			t.Errorf("(%X) address value =0x %X, expected = 0x%X", workRAMBank0BaseAddress, value, 0xF0FF)
 		}
 	}
 }
@@ -208,7 +208,7 @@ func testLdABcp(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.A != 0x0F {
-			t.Errorf("cpu.registers.A = %X, expected = %X", cpu.registers.A, 0x0F)
+			t.Errorf("cpu.registers.A = 0x%X, expected = 0x%X", cpu.registers.A, 0x0F)
 		}
 	}
 }
@@ -219,7 +219,7 @@ func testLdCN(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.C != 0xE {
-			t.Errorf("cpu.registers.C = %X, expected = %X", cpu.registers.C, 0xE)
+			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0xE)
 		}
 	}
 }
@@ -258,7 +258,7 @@ func testLdDn(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.D != 0x06 {
-			t.Errorf("cpu.registers.D = %X, expected = %X", cpu.registers.D, 0x06)
+			t.Errorf("cpu.registers.D = 0x%X, expected = 0x%X", cpu.registers.D, 0x06)
 		}
 	}
 }
@@ -268,11 +268,11 @@ func testIncBc(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0x01 {
-			t.Errorf("cpu.registers.B = %X, expected = %X", cpu.registers.B, 0x01)
+			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0x01)
 		}
 
 		if cpu.registers.C != 0x02 {
-			t.Errorf("cpu.registers.C = %X, expected = %X", cpu.registers.C, 0x02)
+			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0x02)
 		}
 	}
 }
@@ -292,7 +292,7 @@ func testIncBcOverflow(t *testing.T, cpu *cpu) func() {
 }
 
 func testAddHlBc(t *testing.T, cpu *cpu) func() {
-	cpu.registers.F = negativeFlag | zeroFlag
+	cpu.registers.F = zeroFlag | negativeFlag
 
 	cpu.registers.writeBC(0x0003)
 	cpu.registers.writeHL(0x0200)
@@ -308,7 +308,7 @@ func testAddHlBc(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & negativeFlag) == negativeFlag {
-			t.Error("Negative flag must be reset")
+			t.Error("Negative flag must be disabled")
 		}
 
 		if (cpu.registers.F & halfCarryFlag) == halfCarryFlag {
@@ -321,8 +321,8 @@ func testAddHlBc(t *testing.T, cpu *cpu) func() {
 	}
 }
 
-func testAddHlBcCarryAndHalfCarry(t *testing.T, cpu *cpu) func() {
-	cpu.registers.F = negativeFlag | zeroFlag
+func testAddHlBcCarryAndHalfCarryEnable(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F = zeroFlag | negativeFlag
 
 	//   0100 0100 0000 0000
 	// + 1100 1100 0000 0000
@@ -332,7 +332,7 @@ func testAddHlBcCarryAndHalfCarry(t *testing.T, cpu *cpu) func() {
 	return func() {
 		value := cpu.registers.readHL()
 		if value != 0x1000 {
-			t.Errorf("HL register value = %d, expected = %d", value, 0x1000)
+			t.Errorf("HL register value = 0x%X, expected = 0x%X", value, 0x1000)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -340,7 +340,7 @@ func testAddHlBcCarryAndHalfCarry(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & negativeFlag) == negativeFlag {
-			t.Error("Negative flag must be reset")
+			t.Error("Negative flag must be disabled")
 		}
 
 		if (cpu.registers.F & halfCarryFlag) != halfCarryFlag {
@@ -380,11 +380,11 @@ func testIncDe(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.D != 0x01 {
-			t.Errorf("cpu.registers.D = %X, expected = %X", cpu.registers.D, 0x01)
+			t.Errorf("cpu.registers.D = 0x%X, expected = 0x%X", cpu.registers.D, 0x01)
 		}
 
 		if cpu.registers.E != 0x02 {
-			t.Errorf("cpu.registers.E = %X, expected = %X", cpu.registers.E, 0x02)
+			t.Errorf("cpu.registers.E = 0x%X, expected = 0x%X", cpu.registers.E, 0x02)
 		}
 	}
 }
@@ -394,11 +394,11 @@ func testIncDeOverflow(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.D != 0x00 {
-			t.Errorf("cpu.registers.D = %X, expected = %X", cpu.registers.D, 0x00)
+			t.Errorf("cpu.registers.D = 0x%X, expected = 0x%X", cpu.registers.D, 0x00)
 		}
 
 		if cpu.registers.E != 0x00 {
-			t.Errorf("cpu.registers.E = %X, expected = %X", cpu.registers.E, 0x00)
+			t.Errorf("cpu.registers.E = 0x%X, expected = 0x%X", cpu.registers.E, 0x00)
 		}
 	}
 }
@@ -409,15 +409,15 @@ func testIncB(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0x10 {
-			t.Errorf("cpu.registers.B = %X, expected = %X", cpu.registers.B, 0x010)
+			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0x010)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
-			t.Error("Zero flag must be reset")
+			t.Error("Zero flag must be disabled")
 		}
 
 		if (cpu.registers.F & negativeFlag) == negativeFlag {
-			t.Error("Negative flag must be reset")
+			t.Error("Negative flag must be disabled")
 		}
 
 		if (cpu.registers.F & halfCarryFlag) != halfCarryFlag {
@@ -425,7 +425,7 @@ func testIncB(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
-			t.Error("Carry flag must be stay untouched")
+			t.Error("Carry flag must be enabled")
 		}
 	}
 }
@@ -436,7 +436,7 @@ func testIncBOverflowAndHalfCarry(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0x00 {
-			t.Errorf("cpu.registers.B = %X, expected = %X", cpu.registers.B, 0x0)
+			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0x0)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -444,7 +444,7 @@ func testIncBOverflowAndHalfCarry(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & negativeFlag) == negativeFlag {
-			t.Error("Negative flag must be reset")
+			t.Error("Negative flag must be disabled")
 		}
 
 		if (cpu.registers.F & halfCarryFlag) != halfCarryFlag {
@@ -452,7 +452,7 @@ func testIncBOverflowAndHalfCarry(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
-			t.Error("Carry flag must stay untouched")
+			t.Error("Carry flag must be enabled")
 		}
 	}
 }
@@ -463,11 +463,11 @@ func testDecB(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0x0E {
-			t.Errorf("cpu.registers.B = %X, expected = %X", cpu.registers.B, 0x0E)
+			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0x0E)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
-			t.Error("Zero flag must be reset")
+			t.Error("Zero flag must be disabled")
 		}
 
 		if (cpu.registers.F & negativeFlag) != negativeFlag {
@@ -479,7 +479,7 @@ func testDecB(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
-			t.Error("Carry flag must stay untouched")
+			t.Error("Carry flag must be enabled")
 		}
 	}
 }
@@ -490,7 +490,7 @@ func testDecBZeroFlag(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0x0 {
-			t.Errorf("cpu.registers.B = %X, expected = %X", cpu.registers.B, 0x0)
+			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0x0)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -506,7 +506,7 @@ func testDecBZeroFlag(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
-			t.Error("Carry flag must stay untouched")
+			t.Error("Carry flag must be enabled")
 		}
 	}
 }
@@ -517,11 +517,11 @@ func testDecBUnderflow(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.B != 0xFF {
-			t.Errorf("cpu.registers.B = %X, expected = %X", cpu.registers.B, 0xFF)
+			t.Errorf("cpu.registers.B = 0x%X, expected = 0x%X", cpu.registers.B, 0xFF)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
-			t.Error("Zero flag must be reset")
+			t.Error("Zero flag must be disabled")
 		}
 
 		if (cpu.registers.F & negativeFlag) != negativeFlag {
@@ -529,11 +529,11 @@ func testDecBUnderflow(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & halfCarryFlag) == halfCarryFlag {
-			t.Error("Half carry flag must be reset")
+			t.Error("Half carry flag must be disabled")
 		}
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
-			t.Error("Carry flag must stay untouched")
+			t.Error("Carry flag must be enabled")
 		}
 	}
 }
@@ -543,23 +543,23 @@ func testIncC(t *testing.T, cpu *cpu) func() {
 	cpu.registers.F = zeroFlag | negativeFlag | carryFlag
 	return func() {
 		if cpu.registers.C != 0x2 {
-			t.Errorf("cpu.registers.C = %X, expected = %X", cpu.registers.C, 0x2)
+			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0x2)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
-			t.Error("Zero flag must be reset")
+			t.Error("Zero flag must be disabled")
 		}
 
 		if (cpu.registers.F & negativeFlag) == negativeFlag {
-			t.Error("Negative flag must be reseted")
+			t.Error("Negative flag must be disabled")
 		}
 
 		if (cpu.registers.F & halfCarryFlag) == halfCarryFlag {
-			t.Error("Half carry flag must be reset")
+			t.Error("Half carry flag must be disabled")
 		}
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
-			t.Error("Carry flag must stay untouched")
+			t.Error("Carry flag must be enabled")
 		}
 	}
 }
@@ -570,7 +570,7 @@ func testIncCOverflowAndHalfCarry(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.C != 0x0 {
-			t.Errorf("cpu.registers.C = %X, expected = %X", cpu.registers.C, 0x0)
+			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0x0)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -578,7 +578,7 @@ func testIncCOverflowAndHalfCarry(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & negativeFlag) == negativeFlag {
-			t.Error("Negative flag must be reset")
+			t.Error("Negative flag must be disabled")
 		}
 
 		if (cpu.registers.F & halfCarryFlag) != halfCarryFlag {
@@ -586,7 +586,7 @@ func testIncCOverflowAndHalfCarry(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
-			t.Error("Carry flag must stay untouched")
+			t.Error("Carry flag must be enabled")
 		}
 	}
 }
@@ -597,7 +597,7 @@ func testDecC(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.C != 0x0 {
-			t.Errorf("cpu.registers.C = %X, expected = %X", cpu.registers.C, 0x0)
+			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0x0)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -624,7 +624,7 @@ func testDecCZeroFlag(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.C != 0x0 {
-			t.Errorf("cpu.registers.C = %X, expected = %X", cpu.registers.C, 0x0)
+			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0x0)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -651,11 +651,11 @@ func testDecCUnderflow(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.C != 0xFF {
-			t.Errorf("cpu.registers.C = %X, expected = %X", cpu.registers.C, 0xFF)
+			t.Errorf("cpu.registers.C = 0x%X, expected = 0x%X", cpu.registers.C, 0xFF)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
-			t.Error("Zero flag must be reset")
+			t.Error("Zero flag must be disabled")
 		}
 
 		if (cpu.registers.F & negativeFlag) != negativeFlag {
@@ -663,7 +663,7 @@ func testDecCUnderflow(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & halfCarryFlag) == halfCarryFlag {
-			t.Error("Half carry flag must be reset")
+			t.Error("Half carry flag must be disabled")
 		}
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
@@ -682,11 +682,11 @@ func testIncD(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
-			t.Error("Zero flag must be reset")
+			t.Error("Zero flag must be disabled")
 		}
 
 		if (cpu.registers.F & negativeFlag) == negativeFlag {
-			t.Error("Negative flag must be reset")
+			t.Error("Negative flag must be disabled")
 		}
 
 		if (cpu.registers.F & halfCarryFlag) != halfCarryFlag {
@@ -694,7 +694,7 @@ func testIncD(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
-			t.Error("Carry flag must be stay untouched")
+			t.Error("Carry flag must be enabled")
 		}
 	}
 }
@@ -713,7 +713,7 @@ func testIncDOverflowAndHalfCarry(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & negativeFlag) == negativeFlag {
-			t.Error("Negative flag must be reset")
+			t.Error("Negative flag must be disabled")
 		}
 
 		if (cpu.registers.F & halfCarryFlag) != halfCarryFlag {
@@ -721,7 +721,7 @@ func testIncDOverflowAndHalfCarry(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
-			t.Error("Carry flag must stay untouched")
+			t.Error("Carry flag must be enabled")
 		}
 	}
 }
@@ -732,7 +732,7 @@ func testDecD(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.D != 0x0 {
-			t.Errorf("cpu.registers.D = %X, expected = %X", cpu.registers.D, 0x0)
+			t.Errorf("cpu.registers.D = 0x%X, expected = 0x%X", cpu.registers.D, 0x0)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -759,7 +759,7 @@ func testDecDZeroFlag(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.D != 0x0 {
-			t.Errorf("cpu.registers.D = %X, expected = %X", cpu.registers.D, 0x0)
+			t.Errorf("cpu.registers.D = 0x%X, expected = 0x%X", cpu.registers.D, 0x0)
 		}
 
 		if (cpu.registers.F & zeroFlag) != zeroFlag {
@@ -786,11 +786,11 @@ func testDecDUnderflow(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.D != 0xFF {
-			t.Errorf("cpu.registers.D = %X, expected = %X", cpu.registers.D, 0xFF)
+			t.Errorf("cpu.registers.D = 0x%X, expected = 0x%X", cpu.registers.D, 0xFF)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
-			t.Error("Zero flag must be reset")
+			t.Error("Zero flag must be disabled")
 		}
 
 		if (cpu.registers.F & negativeFlag) != negativeFlag {
@@ -798,7 +798,7 @@ func testDecDUnderflow(t *testing.T, cpu *cpu) func() {
 		}
 
 		if (cpu.registers.F & halfCarryFlag) == halfCarryFlag {
-			t.Error("Half carry flag must be reset")
+			t.Error("Half carry flag must be disabled")
 		}
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
@@ -813,7 +813,7 @@ func testRlca(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.A != 0x02 {
-			t.Errorf("cpu.registers.A = %X, expected = %X", cpu.registers.A, 0x02)
+			t.Errorf("cpu.registers.A = 0x%X, expected = 0x%X", cpu.registers.A, 0x02)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -840,7 +840,7 @@ func testRlcaApplyCarryAndEnableCarryFlag(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.A != 0x03 {
-			t.Errorf("cpu.registers.A = %X, expected = %X", cpu.registers.A, 0x03)
+			t.Errorf("cpu.registers.A = 0x%X, expected = 0x%X", cpu.registers.A, 0x03)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -867,7 +867,7 @@ func testRrca(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.A != 0x82 {
-			t.Errorf("cpu.registers.A = %X, expected = %X", cpu.registers.A, 0x82)
+			t.Errorf("cpu.registers.A = 0x%X, expected = 0x%X", cpu.registers.A, 0x82)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -921,7 +921,7 @@ func testRla(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.A != 0x02 {
-			t.Errorf("cpu.registers.A = %X, expected = %X", cpu.registers.A, 0x02)
+			t.Errorf("cpu.registers.A = 0x%X, expected = 0x%X", cpu.registers.A, 0x02)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -948,7 +948,7 @@ func testRlaApplyCarryAndDisableCarryFlag(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.A != 0x03 {
-			t.Errorf("cpu.registers.A = %X, expected = %X", cpu.registers.A, 0x03)
+			t.Errorf("cpu.registers.A = 0x%X, expected = 0x%X", cpu.registers.A, 0x03)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {
@@ -975,7 +975,7 @@ func testRlaApplyCarryAndEnableCarryFlag(t *testing.T, cpu *cpu) func() {
 
 	return func() {
 		if cpu.registers.A != 0x03 {
-			t.Errorf("cpu.registers.A = %X, expected = %X", cpu.registers.A, 0x03)
+			t.Errorf("cpu.registers.A = 0x%X, expected = 0x%X", cpu.registers.A, 0x03)
 		}
 
 		if (cpu.registers.F & zeroFlag) == zeroFlag {

@@ -56,6 +56,9 @@ func Test8BitsArithmeticLogicalInstructions(t *testing.T) {
 	t.Run("DEC D", instructionTestHandler(testDecD, 0x15))
 	t.Run("DEC D zero flag", instructionTestHandler(testDecDZeroFlag, 0x15))
 	t.Run("DEC D underflow", instructionTestHandler(testDecDUnderflow, 0x15))
+
+	t.Run("INC D", instructionTestHandler(testIncE, 0x1C))
+	t.Run("INC D register overflow and half carry flag trigger", instructionTestHandler(testIncEOverflowAndHalfCarry, 0x1C))
 }
 
 func Test8bitRotationsshiftsAndBitInstructions(t *testing.T) {
@@ -906,6 +909,60 @@ func testDecDUnderflow(t *testing.T, cpu *cpu) func() {
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
 			t.Errorf("Carry flag must be enabled")
+		}
+	}
+}
+
+func testIncE(t *testing.T, cpu *cpu) func() {
+	cpu.registers.E = 0x0F
+	cpu.registers.F = zeroFlag | negativeFlag | carryFlag
+
+	return func() {
+		if cpu.registers.E != 0x10 {
+			t.Errorf("cpu.registers.E = %0#2X, expected = %0#2X", cpu.registers.E, 0x010)
+		}
+
+		if (cpu.registers.F & zeroFlag) == zeroFlag {
+			t.Error("Zero flag must be disabled")
+		}
+
+		if (cpu.registers.F & negativeFlag) == negativeFlag {
+			t.Error("Negative flag must be disabled")
+		}
+
+		if (cpu.registers.F & halfCarryFlag) != halfCarryFlag {
+			t.Error("Half carry flag must be enabled")
+		}
+
+		if (cpu.registers.F & carryFlag) != carryFlag {
+			t.Error("Carry flag must be enabled")
+		}
+	}
+}
+
+func testIncEOverflowAndHalfCarry(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F = negativeFlag | carryFlag
+	cpu.registers.E = 0xFF
+
+	return func() {
+		if cpu.registers.E != 0x00 {
+			t.Errorf("cpu.registers.E = %0#2X, expected = %0#2X", cpu.registers.E, 0x0)
+		}
+
+		if (cpu.registers.F & zeroFlag) != zeroFlag {
+			t.Error("Zero flag must be enabled")
+		}
+
+		if (cpu.registers.F & negativeFlag) == negativeFlag {
+			t.Error("Negative flag must be disabled")
+		}
+
+		if (cpu.registers.F & halfCarryFlag) != halfCarryFlag {
+			t.Error("Half carry flag must be enabled")
+		}
+
+		if (cpu.registers.F & carryFlag) != carryFlag {
+			t.Error("Carry flag must be enabled")
 		}
 	}
 }

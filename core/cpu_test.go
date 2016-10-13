@@ -34,6 +34,8 @@ func Test16BitsArithmeticLogicalInstructions(t *testing.T) {
 	t.Run("INC DE overflow", noFlagModificationInstructionTestHandler(testIncDeOverflow, 0x13))
 	t.Run("ADD HL DE", instructionTestHandler(testAddHlDe, 0x19))
 	t.Run("ADD HL DE carry and half carry flags trigger", instructionTestHandler(testAddHlDeCarryAndHalfCarryEnable, 0x19))
+	t.Run("DEC DE", noFlagModificationInstructionTestHandler(testDecDe, 0x1B))
+	t.Run("DEC DE underflow", noFlagModificationInstructionTestHandler(testDecDeUnderflow, 0x1B))
 }
 
 func Test8BitsArithmeticLogicalInstructions(t *testing.T) {
@@ -478,6 +480,28 @@ func testAddHlDeCarryAndHalfCarryEnable(t *testing.T, cpu *cpu) func() {
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
 			t.Error("Carry flag must be enabled")
+		}
+	}
+}
+
+func testDecDe(t *testing.T, cpu *cpu) func() {
+	cpu.registers.writeDE(0x1)
+
+	return func() {
+		value := cpu.registers.readDE()
+		if value != 0x0 {
+			t.Errorf("cpu.registers.DE = %0#4X, expected = %0#4X", value, 0x0)
+		}
+	}
+}
+
+func testDecDeUnderflow(t *testing.T, cpu *cpu) func() {
+	cpu.registers.writeDE(0x0)
+
+	return func() {
+		value := cpu.registers.readDE()
+		if value != 0xFFFF {
+			t.Errorf("cpu.registers.DE = %0#4X, expected = %0#4X", value, 0xFFFF)
 		}
 	}
 }

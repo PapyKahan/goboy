@@ -3,38 +3,38 @@ package core
 // nn = int16
 // n = int8
 var instructionSetDeclaration = map[int]*instruction{
-	0x00: &instruction{name: "NOP", ticks: 4, length: 1, handler: handlerFunc(nop)},
-	0x01: &instruction{name: "LD BC nn", ticks: 12, length: 3, handler: handlerFunc(ldBcNn)},
-	0x02: &instruction{name: "LD (BC) A", ticks: 8, length: 1, handler: handlerFunc(ldBcpA)},
-	0x03: &instruction{name: "INC BC", ticks: 8, length: 1, handler: handlerFunc(incBc)},
-	0x04: &instruction{name: "INC B", ticks: 4, length: 1, handler: handlerFunc(incB)},
-	0x05: &instruction{name: "DEC B", ticks: 4, length: 1, handler: handlerFunc(decB)},
-	0x06: &instruction{name: "LD B n", ticks: 8, length: 2, handler: handlerFunc(ldBn)},
-	0x07: &instruction{name: "RLCA", ticks: 4, length: 1, handler: handlerFunc(rlca)},
-	0x08: &instruction{name: "LD (nn) SP", ticks: 20, length: 3, handler: handlerFunc(ldNnpSp)},
-	0x09: &instruction{name: "ADD HL BC", ticks: 8, length: 1, handler: handlerFunc(addHlBc)},
-	0x0A: &instruction{name: "LD A (BC)", ticks: 8, length: 1, handler: handlerFunc(ldABcp)},
-	0x0B: &instruction{name: "DEC BC", ticks: 8, length: 1, handler: handlerFunc(decBc)},
-	0x0C: &instruction{name: "INC C", ticks: 4, length: 1, handler: handlerFunc(incC)},
-	0x0D: &instruction{name: "DEC C", ticks: 4, length: 1, handler: handlerFunc(decC)},
-	0x0E: &instruction{name: "LD C n", ticks: 8, length: 2, handler: handlerFunc(ldCN)},
-	0x0F: &instruction{name: "RRCA", ticks: 4, length: 1, handler: handlerFunc(rrca)},
-	0x10: &instruction{name: "STOP", ticks: 4, length: 2, handler: handlerFunc(stop)},
-	0x11: &instruction{name: "LD DE nn", ticks: 12, length: 3, handler: handlerFunc(ldDeNn)},
-	0x12: &instruction{name: "LD (DE) A", ticks: 8, length: 1, handler: handlerFunc(ldDepA)},
-	0x13: &instruction{name: "INC DE", ticks: 8, length: 1, handler: handlerFunc(incDe)},
-	0x14: &instruction{name: "INC D", ticks: 4, length: 1, handler: handlerFunc(incD)},
-	0x15: &instruction{name: "DEC D", ticks: 4, length: 1, handler: handlerFunc(decD)},
-	0x16: &instruction{name: "LD D n", ticks: 8, length: 2, handler: handlerFunc(ldDn)},
-	0x17: &instruction{name: "RLA", ticks: 4, length: 1, handler: handlerFunc(rla)},
-	0x18: &instruction{name: "JR n", ticks: 12, length: 2, handler: handlerFunc(jrn)},
-	0x19: &instruction{name: "ADD HL DE", ticks: 8, length: 1, handler: handlerFunc(addHlDe)},
-	0x1A: &instruction{name: "LD A (DE)", ticks: 8, length: 1, handler: handlerFunc(ldADep)},
-	0x1B: &instruction{name: "DEC DE", ticks: 8, length: 1, handler: handlerFunc(decDe)},
-	0x1C: &instruction{name: "INC E", ticks: 4, length: 1, handler: handlerFunc(incE)},
-	0x1D: &instruction{name: "DEC E", ticks: 4, length: 1, handler: handlerFunc(decE)},
-	0x1E: &instruction{name: "LD E n", ticks: 8, length: 2, handler: handlerFunc(ldEn)},
-	0x1F: &instruction{name: "RRA", ticks: 4, length: 1, handler: handlerFunc(rra)},
+	0x00: &instruction{name: "NOP", actionTakenTicks: 4, length: 1, handler: nop},
+	0x01: &instruction{name: "LD BC nn", actionTakenTicks: 12, length: 3, handler: ldBcNn},
+	0x02: &instruction{name: "LD (BC) A", actionTakenTicks: 8, length: 1, handler: ldBcpA},
+	0x03: &instruction{name: "INC BC", actionTakenTicks: 8, length: 1, handler: incBc},
+	0x04: &instruction{name: "INC B", actionTakenTicks: 4, length: 1, handler: incB},
+	0x05: &instruction{name: "DEC B", actionTakenTicks: 4, length: 1, handler: decB},
+	0x06: &instruction{name: "LD B n", actionTakenTicks: 8, length: 2, handler: ldBn},
+	0x07: &instruction{name: "RLCA", actionTakenTicks: 4, length: 1, handler: rlca},
+	0x08: &instruction{name: "LD (nn) SP", actionTakenTicks: 20, length: 3, handler: ldNnpSp},
+	0x09: &instruction{name: "ADD HL BC", actionTakenTicks: 8, length: 1, handler: addHlBc},
+	0x0A: &instruction{name: "LD A (BC)", actionTakenTicks: 8, length: 1, handler: ldABcp},
+	0x0B: &instruction{name: "DEC BC", actionTakenTicks: 8, length: 1, handler: decBc},
+	0x0C: &instruction{name: "INC C", actionTakenTicks: 4, length: 1, handler: incC},
+	0x0D: &instruction{name: "DEC C", actionTakenTicks: 4, length: 1, handler: decC},
+	0x0E: &instruction{name: "LD C n", actionTakenTicks: 8, length: 2, handler: ldCN},
+	0x0F: &instruction{name: "RRCA", actionTakenTicks: 4, length: 1, handler: rrca},
+	0x10: &instruction{name: "STOP", actionTakenTicks: 4, length: 2, handler: stop},
+	0x11: &instruction{name: "LD DE nn", actionTakenTicks: 12, length: 3, handler: ldDeNn},
+	0x12: &instruction{name: "LD (DE) A", actionTakenTicks: 8, length: 1, handler: ldDepA},
+	0x13: &instruction{name: "INC DE", actionTakenTicks: 8, length: 1, handler: incDe},
+	0x14: &instruction{name: "INC D", actionTakenTicks: 4, length: 1, handler: incD},
+	0x15: &instruction{name: "DEC D", actionTakenTicks: 4, length: 1, handler: decD},
+	0x16: &instruction{name: "LD D n", actionTakenTicks: 8, length: 2, handler: ldDn},
+	0x17: &instruction{name: "RLA", actionTakenTicks: 4, length: 1, handler: rla},
+	0x18: &instruction{name: "JR n", actionTakenTicks: 12, length: 2, handler: jrn},
+	0x19: &instruction{name: "ADD HL DE", actionTakenTicks: 8, length: 1, handler: addHlDe},
+	0x1A: &instruction{name: "LD A (DE)", actionTakenTicks: 8, length: 1, handler: ldADep},
+	0x1B: &instruction{name: "DEC DE", actionTakenTicks: 8, length: 1, handler: decDe},
+	0x1C: &instruction{name: "INC E", actionTakenTicks: 4, length: 1, handler: incE},
+	0x1D: &instruction{name: "DEC E", actionTakenTicks: 4, length: 1, handler: decE},
+	0x1E: &instruction{name: "LD E n", actionTakenTicks: 8, length: 2, handler: ldEn},
+	0x1F: &instruction{name: "RRA", actionTakenTicks: 4, length: 1, handler: rra},
 }
 
 type cpu struct {
@@ -60,9 +60,6 @@ func (cpu *cpu) initialize() {
 
 func (cpu *cpu) initializeInstructionset() error {
 	cpu.instructionSet = &instructionSetDeclaration
-	for _, instruction := range *cpu.instructionSet {
-		instruction.cpu = cpu
-	}
 	return nil
 }
 
@@ -74,7 +71,28 @@ func (cpu *cpu) next() error {
 	opcode := cpu.mmu.readByte(cpu.registers.pc)
 	cpu.registers.pc++
 	inst := (*cpu.instructionSet)[int(opcode)]
-	inst.execute()
+
+	var parameters uint16
+
+	switch inst.length {
+	case 1:
+		parameters = 0
+	case 2:
+		parameters = uint16(cpu.mmu.readByte(cpu.registers.pc))
+
+	case 3:
+		parameters = cpu.mmu.readWord(cpu.registers.pc)
+	}
+
+	condition := inst.handler(cpu, parameters)
+	cpu.registers.pc += uint16(inst.length - 1)
+
+	if condition {
+		cpu.ticks += inst.actionTakenTicks
+	} else {
+		cpu.ticks += inst.actionNotTaketTicks
+	}
+
 	return nil
 }
 
@@ -244,145 +262,177 @@ func (cpu *cpu) relativeJump(value byte) {
 
 // Instructions implementation :
 
-func nop(cpu *cpu, _ uint16) {
+func nop(cpu *cpu, _ uint16) bool {
+	return true
 }
 
-func ldBcNn(cpu *cpu, parameter uint16) {
+func ldBcNn(cpu *cpu, parameter uint16) bool {
 	cpu.registers.writeBC(parameter)
+	return true
 }
 
-func ldBcpA(cpu *cpu, _ uint16) {
+func ldBcpA(cpu *cpu, _ uint16) bool {
 	cpu.mmu.writeByte(cpu.registers.readBC(), cpu.registers.A)
+	return true
 }
 
-func incBc(cpu *cpu, _ uint16) {
+func incBc(cpu *cpu, _ uint16) bool {
 	bc := cpu.registers.readBC()
 	bc++
 	cpu.registers.writeBC(bc)
+	return true
 }
 
-func incB(cpu *cpu, _ uint16) {
+func incB(cpu *cpu, _ uint16) bool {
 	cpu.registers.B = cpu.aluInc(cpu.registers.B)
+	return true
 }
 
-func decB(cpu *cpu, _ uint16) {
+func decB(cpu *cpu, _ uint16) bool {
 	cpu.registers.B = cpu.aluDec(cpu.registers.B)
+	return true
 }
 
-func ldBn(cpu *cpu, parameter uint16) {
+func ldBn(cpu *cpu, parameter uint16) bool {
 	cpu.registers.B = uint8(parameter & 0x00FF)
+	return true
 }
 
-func rlca(cpu *cpu, _ uint16) {
+func rlca(cpu *cpu, _ uint16) bool {
 	cpu.registers.A = cpu.rotateLeftCarry(cpu.registers.A)
 	cpu.registers.F &^= zeroFlag
+	return true
 }
 
-func ldNnpSp(cpu *cpu, value uint16) {
+func ldNnpSp(cpu *cpu, value uint16) bool {
 	cpu.mmu.writeWord(value, cpu.registers.sp)
+	return true
 }
 
-func addHlBc(cpu *cpu, _ uint16) {
+func addHlBc(cpu *cpu, _ uint16) bool {
 	hl := cpu.registers.readHL()
 	bc := cpu.registers.readBC()
 	cpu.registers.writeHL(cpu.addWord(hl, bc))
+	return true
 }
 
-func ldABcp(cpu *cpu, address uint16) {
+func ldABcp(cpu *cpu, address uint16) bool {
 	cpu.registers.A = cpu.mmu.readByte(cpu.registers.readBC())
+	return true
 }
 
-func decBc(cpu *cpu, _ uint16) {
+func decBc(cpu *cpu, _ uint16) bool {
 	value := cpu.registers.readBC()
 	value--
 	cpu.registers.writeBC(value)
+	return true
 }
 
-func incC(cpu *cpu, _ uint16) {
+func incC(cpu *cpu, _ uint16) bool {
 	cpu.registers.C = cpu.aluInc(cpu.registers.C)
+	return true
 }
 
-func decC(cpu *cpu, _ uint16) {
+func decC(cpu *cpu, _ uint16) bool {
 	cpu.registers.C = cpu.aluDec(cpu.registers.C)
+	return true
 }
 
-func ldCN(cpu *cpu, value uint16) {
+func ldCN(cpu *cpu, value uint16) bool {
 	cpu.registers.C = byte(value & 0x00FF)
+	return true
 }
 
-func rrca(cpu *cpu, _ uint16) {
+func rrca(cpu *cpu, _ uint16) bool {
 	cpu.registers.A = cpu.aluRotateRightCarry(cpu.registers.A)
 	cpu.registers.F &^= zeroFlag
+	return true
 }
 
-func stop(cpu *cpu, _ uint16) {
+func stop(cpu *cpu, _ uint16) bool {
 	cpu.stoped = true
+	return true
 }
 
-func ldDeNn(cpu *cpu, value uint16) {
+func ldDeNn(cpu *cpu, value uint16) bool {
 	cpu.registers.writeDE(value)
+	return true
 }
 
-func ldDepA(cpu *cpu, _ uint16) {
+func ldDepA(cpu *cpu, _ uint16) bool {
 	cpu.mmu.writeByte(cpu.registers.readDE(), cpu.registers.A)
+	return true
 }
 
-func incDe(cpu *cpu, _ uint16) {
+func incDe(cpu *cpu, _ uint16) bool {
 	de := cpu.registers.readDE()
 	de++
 	cpu.registers.writeDE(de)
+	return true
 }
 
-func incD(cpu *cpu, _ uint16) {
+func incD(cpu *cpu, _ uint16) bool {
 	cpu.registers.D = cpu.aluInc(cpu.registers.D)
+	return true
 }
 
-func decD(cpu *cpu, _ uint16) {
+func decD(cpu *cpu, _ uint16) bool {
 	cpu.registers.D = cpu.aluDec(cpu.registers.D)
+	return true
 }
 
-func ldDn(cpu *cpu, value uint16) {
+func ldDn(cpu *cpu, value uint16) bool {
 	cpu.registers.D = byte(value & 0x00FF)
+	return true
 }
 
-func rla(cpu *cpu, _ uint16) {
+func rla(cpu *cpu, _ uint16) bool {
 	cpu.registers.A = cpu.rotateLeft(cpu.registers.A)
 	cpu.registers.F &^= zeroFlag
+	return true
 }
 
-func jrn(cpu *cpu, value uint16) {
+func jrn(cpu *cpu, value uint16) bool {
 	cpu.relativeJump(byte(value & 0x00FF))
+	return true
 }
 
-func addHlDe(cpu *cpu, value uint16) {
+func addHlDe(cpu *cpu, value uint16) bool {
 	hl := cpu.registers.readHL()
 	de := cpu.registers.readDE()
 	cpu.registers.writeHL(cpu.addWord(hl, de))
+	return true
 }
 
-func ldADep(cpu *cpu, address uint16) {
+func ldADep(cpu *cpu, address uint16) bool {
 	cpu.registers.A = cpu.mmu.readByte(cpu.registers.readDE())
+	return true
 }
 
-func decDe(cpu *cpu, _ uint16) {
+func decDe(cpu *cpu, _ uint16) bool {
 	value := cpu.registers.readDE()
 	value--
 	cpu.registers.writeDE(value)
+	return true
 }
 
-func incE(cpu *cpu, _ uint16) {
+func incE(cpu *cpu, _ uint16) bool {
 	cpu.registers.E = cpu.aluInc(cpu.registers.E)
+	return true
 }
 
-func decE(cpu *cpu, _ uint16) {
+func decE(cpu *cpu, _ uint16) bool {
 	cpu.registers.E = cpu.aluDec(cpu.registers.E)
+	return true
 }
 
-func ldEn(cpu *cpu, value uint16) {
+func ldEn(cpu *cpu, value uint16) bool {
 	cpu.registers.E = byte(value & 0x00FF)
+	return true
 }
 
-func rra(cpu *cpu, _ uint16) {
+func rra(cpu *cpu, _ uint16) bool {
 	cpu.registers.A = cpu.rotateRight(cpu.registers.A)
 	cpu.registers.F &^= zeroFlag
+	return true
 }

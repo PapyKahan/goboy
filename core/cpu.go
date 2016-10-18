@@ -35,6 +35,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x1D: &instruction{name: "DEC E", actionTakenTicks: 4, length: 1, handler: decE},
 	0x1E: &instruction{name: "LD E n", actionTakenTicks: 8, length: 2, handler: ldEn},
 	0x1F: &instruction{name: "RRA", actionTakenTicks: 4, length: 1, handler: rra},
+	0x20: &instruction{name: "JR NZ n", actionTakenTicks: 12, actionNotTakenTicks: 8, length: 2, handler: jrNzn},
 }
 
 type cpu struct {
@@ -90,7 +91,7 @@ func (cpu *cpu) next() error {
 	if condition {
 		cpu.ticks += inst.actionTakenTicks
 	} else {
-		cpu.ticks += inst.actionNotTaketTicks
+		cpu.ticks += inst.actionNotTakenTicks
 	}
 
 	return nil
@@ -435,4 +436,12 @@ func rra(cpu *cpu, _ uint16) bool {
 	cpu.registers.A = cpu.rotateRight(cpu.registers.A)
 	cpu.registers.F &^= zeroFlag
 	return true
+}
+
+func jrNzn(cpu *cpu, value uint16) bool {
+	if cpu.registers.F&zeroFlag != zeroFlag {
+		cpu.relativeJump(byte(value & 0x00FF))
+		return true
+	}
+	return false
 }

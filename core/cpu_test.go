@@ -24,19 +24,25 @@ func TestLoadMoveStoreInstructions(t *testing.T) {
 	t.Run("LD D n", noFlagModificationInstructionTestHandler(testLdDn, 0x16))
 	t.Run("LD A (DE)", noFlagModificationInstructionTestHandler(testLdADep, 0x1A))
 	t.Run("LD E n", noFlagModificationInstructionTestHandler(testLdEn, 0x1E))
+	t.Run("LD HL nn", noFlagModificationInstructionTestHandler(testLdHlNn, 0x21))
 }
 
 func Test16BitsArithmeticLogicalInstructions(t *testing.T) {
 	t.Run("INC BC", noFlagModificationInstructionTestHandler(testIncBc, 0x03))
 	t.Run("INC BC overflow", noFlagModificationInstructionTestHandler(testIncBcOverflow, 0x03))
+
 	t.Run("ADD HL, BC", instructionTestHandler(testAddHlBc, 0x09))
 	t.Run("ADD HL, BC carry and half carry flags trigger", instructionTestHandler(testAddHlBcCarryAndHalfCarryEnable, 0x09))
+
 	t.Run("DEC BC", noFlagModificationInstructionTestHandler(testDecBc, 0x0B))
 	t.Run("DEC BC underflow", noFlagModificationInstructionTestHandler(testDecBcUnderflow, 0x0B))
+
 	t.Run("INC DE", noFlagModificationInstructionTestHandler(testIncDe, 0x13))
 	t.Run("INC DE overflow", noFlagModificationInstructionTestHandler(testIncDeOverflow, 0x13))
+
 	t.Run("ADD HL DE", instructionTestHandler(testAddHlDe, 0x19))
 	t.Run("ADD HL DE carry and half carry flags trigger", instructionTestHandler(testAddHlDeCarryAndHalfCarryEnable, 0x19))
+	
 	t.Run("DEC DE", noFlagModificationInstructionTestHandler(testDecDe, 0x1B))
 	t.Run("DEC DE underflow", noFlagModificationInstructionTestHandler(testDecDeUnderflow, 0x1B))
 }
@@ -306,6 +312,21 @@ func testLdEn(t *testing.T, cpu *cpu) func() {
 	return func() {
 		if cpu.registers.E != 0x06 {
 			t.Errorf("cpu.registers.E = %0#2X, expected = %0#2X", cpu.registers.E, 0x06)
+		}
+	}
+}
+
+func testLdHlNn(t *testing.T, cpu *cpu) func() {
+	cpu.mmu.writeWord(romBank00BaseAddress+1, 0xF0FF)
+	cpu.registers.writeHL(0x0102)
+
+	return func() {
+		if cpu.registers.H != 0xF0 {
+			t.Errorf("cpu.registers.H = %0#2X, expected = %0#2X", cpu.registers.H, 0xF0)
+		}
+
+		if cpu.registers.L != 0xFF {
+			t.Errorf("cpu.registers.L = %0#2X, expected = %0#2X", cpu.registers.L, 0xFF)
 		}
 	}
 }

@@ -26,6 +26,7 @@ func TestLoadMoveStoreInstructions(t *testing.T) {
 	t.Run("LD E n", noFlagModificationInstructionTestHandler(testLdEn, 0x1E))
 	t.Run("LD HL nn", noFlagModificationInstructionTestHandler(testLdHlNn, 0x21))
 	t.Run("LD (HL+) A", noFlagModificationInstructionTestHandler(testLdHlpAIncHl, 0x22))
+	t.Run("LD H n", noFlagModificationInstructionTestHandler(testLdHn, 0x26))
 }
 
 func Test16BitsArithmeticLogicalInstructions(t *testing.T) {
@@ -355,6 +356,17 @@ func testLdHlpAIncHl(t *testing.T, cpu *cpu) func() {
 		hl := cpu.registers.readHL()
 		if hl != workRAMBank0BaseAddress + 1 {
 			t.Errorf("cpu.register.HL = %0#4X, expected = %0#4X", hl, workRAMBank0BaseAddress + 1)
+		}
+	}
+}
+
+func testLdHn(t *testing.T, cpu *cpu) func() {
+	cpu.mmu.writeByte(romBank00BaseAddress+1, 0x6)
+	cpu.registers.H = 0x00
+
+	return func() {
+		if cpu.registers.H != 0x06 {
+			t.Errorf("cpu.registers.H = %0#2X, expected = %0#2X", cpu.registers.H, 0x06)
 		}
 	}
 }

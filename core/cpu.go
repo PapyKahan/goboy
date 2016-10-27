@@ -42,6 +42,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x24: &instruction{name: "INC H", actionTakenTicks: 4, length: 1, handler: incH},
 	0x25: &instruction{name: "DEC H", actionTakenTicks: 4, length: 1, handler: decH},
 	0x26: &instruction{name: "LD H n", actionTakenTicks: 8, length: 2, handler: ldHn},
+	0x27: &instruction{name: "DAA", actionTakenTicks: 4, length: 1, handler: daa},
 }
 
 type cpu struct {
@@ -484,5 +485,43 @@ func decH(cpu *cpu, _ uint16) bool {
 
 func ldHn(cpu *cpu, value uint16) bool {
 	cpu.registers.H = byte(value & 0x00FF)
+	return true
+}
+
+func daa(cpu *cpu, _ uint16) bool {
+	correctionFactor := uint16(cpu.registers.A)
+
+	if cpu.registers.F&negativeFlag != negativeFlag {
+		if (cpu.registers.F&halfCarryFlag == halfCarryFlag) || (correctionFactor & 0x0F > 0x09) {
+			correctionFactor += 0x06
+		}
+
+		if (cpu.registers.F&carryFlag == carryFlag) || (correctionFactor > 0x9F) {
+			correctionFactor += 0x60
+		}
+	} else {
+		if (cpu.registers.F&halfCarryFlag == halfCarryFlag) {
+			correctionFactor = (correctionFactor - 0x06) & 0xFF 
+		}
+
+		if (cpu.registers.F&carryFlag == carryFlag) {
+			correctionFactor -= 0x60
+		}
+	}
+
+	cpu.registers.F &^= halfCarryFlag
+
+	if correctionFactor&0x100 == 0x100 {
+		cpu.registers.F |= carryFlag
+	}
+
+	cpu.registers.A = byte(correctionFactor & 0xFF)
+
+	if cpu.registers.A == 0 {
+		cpu.registers.F |= zeroFlag
+	} else {
+		cpu.registers.F &^= zeroFlag
+	}
+
 	return true
 }

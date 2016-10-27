@@ -116,6 +116,10 @@ func TestJumpCalls(t *testing.T) {
 	t.Run("JR NZ n", noFlagModificationInstructionTestHandler(testJrNzn, 0x20))
 	t.Run("JR NZ n zero flag enabled", noFlagModificationInstructionTestHandler(testJrNznZeroFlagEnabled, 0x20))
 	t.Run("JR NZ n negative value", noFlagModificationInstructionTestHandler(testJrNznNegativeValue, 0x20))
+
+	t.Run("JR Z n", noFlagModificationInstructionTestHandler(testJrZn, 0x20))
+	t.Run("JR Z n zero flag enabled", noFlagModificationInstructionTestHandler(testJrZnZeroFlagDisabled, 0x20))
+	t.Run("JR Z n negative value", noFlagModificationInstructionTestHandler(testJrZnNegativeValue, 0x20))
 }
 
 func instructionTestHandler(test instructionTestFunction, opcode byte) func(t *testing.T) {
@@ -1835,6 +1839,55 @@ func testJrNznNegativeValue(t *testing.T, cpu *cpu) func() {
 		} else {
 			cpu.registers.pc += 15
 			cpu.registers.F |= zeroFlag
+		}
+
+		if cpu.ticks != 12 {
+			t.Errorf("cpu.ticks = %d, expected = %d", cpu.ticks, 8)
+		}
+	}
+}
+
+func testJrZn(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F = zeroFlag
+	cpu.mmu.writeByte(romBank00BaseAddress+1, 0x8)
+
+	return func() {
+		if cpu.registers.pc != 0x000A {
+			t.Errorf("cpu.registers.pc = %0#4X, expected = %0#4X", cpu.registers.pc, 0x000A)
+		} else {
+			cpu.registers.pc -= 0x8
+		}
+		if cpu.ticks != 12 {
+			t.Errorf("cpu.ticks = %d, expected = %d", cpu.ticks, 12)
+		}
+	}
+}
+
+func testJrZnZeroFlagDisabled(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F &^= zeroFlag
+	cpu.mmu.writeByte(romBank00BaseAddress+1, 0x8)
+
+	return func() {
+		if cpu.registers.pc != 0x0002 {
+			t.Errorf("cpu.registers.pc = %0#4X, expected = %0#4X", cpu.registers.pc, 0x0002)
+			cpu.registers.F |= zeroFlag
+		}
+
+		if cpu.ticks != 8 {
+			t.Errorf("cpu.ticks = %d, expected = %d", cpu.ticks, 8)
+		}
+	}
+}
+
+func testJrZnNegativeValue(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F = zeroFlag
+	cpu.mmu.writeByte(romBank00BaseAddress+1, 0xF1) // -15
+
+	return func() {
+		if cpu.registers.pc != 0xFFF3 {
+			t.Errorf("cpu.registers.pc = %0#4X, expected = %0#4X", cpu.registers.pc, 0xFFF3)
+		} else {
+			cpu.registers.pc += 15
 		}
 
 		if cpu.ticks != 12 {

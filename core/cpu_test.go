@@ -117,9 +117,9 @@ func TestJumpCalls(t *testing.T) {
 	t.Run("JR NZ n zero flag enabled", noFlagModificationInstructionTestHandler(testJrNznZeroFlagEnabled, 0x20))
 	t.Run("JR NZ n negative value", noFlagModificationInstructionTestHandler(testJrNznNegativeValue, 0x20))
 
-	t.Run("JR Z n", noFlagModificationInstructionTestHandler(testJrZn, 0x20))
-	t.Run("JR Z n zero flag enabled", noFlagModificationInstructionTestHandler(testJrZnZeroFlagDisabled, 0x20))
-	t.Run("JR Z n negative value", noFlagModificationInstructionTestHandler(testJrZnNegativeValue, 0x20))
+	t.Run("JR Z n", noFlagModificationInstructionTestHandler(testJrZn, 0x28))
+	t.Run("JR Z n zero flag disabled", noFlagModificationInstructionTestHandler(testJrZnZeroFlagDisabled, 0x28))
+	t.Run("JR Z n negative value", noFlagModificationInstructionTestHandler(testJrZnNegativeValue, 0x28))
 }
 
 func instructionTestHandler(test instructionTestFunction, opcode byte) func(t *testing.T) {
@@ -1848,7 +1848,7 @@ func testJrNznNegativeValue(t *testing.T, cpu *cpu) func() {
 }
 
 func testJrZn(t *testing.T, cpu *cpu) func() {
-	cpu.registers.F = zeroFlag
+	cpu.registers.F |= zeroFlag
 	cpu.mmu.writeByte(romBank00BaseAddress+1, 0x8)
 
 	return func() {
@@ -1870,6 +1870,7 @@ func testJrZnZeroFlagDisabled(t *testing.T, cpu *cpu) func() {
 	return func() {
 		if cpu.registers.pc != 0x0002 {
 			t.Errorf("cpu.registers.pc = %0#4X, expected = %0#4X", cpu.registers.pc, 0x0002)
+		} else {
 			cpu.registers.F |= zeroFlag
 		}
 
@@ -1880,7 +1881,7 @@ func testJrZnZeroFlagDisabled(t *testing.T, cpu *cpu) func() {
 }
 
 func testJrZnNegativeValue(t *testing.T, cpu *cpu) func() {
-	cpu.registers.F = zeroFlag
+	cpu.registers.F |= zeroFlag
 	cpu.mmu.writeByte(romBank00BaseAddress+1, 0xF1) // -15
 
 	return func() {

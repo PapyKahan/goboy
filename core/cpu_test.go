@@ -50,6 +50,9 @@ func Test16BitsArithmeticLogicalInstructions(t *testing.T) {
 
 	t.Run("INC HL", noFlagModificationInstructionTestHandler(testIncHl, 0x23))
 	t.Run("INC HL overflow", noFlagModificationInstructionTestHandler(testIncHlOverflow, 0x23))
+
+	t.Run("ADD HL HL", instructionTestHandler(testAddHlHl, 0x29))
+	t.Run("ADD HL HL carry and half carry flags trigger", instructionTestHandler(testAddHlHlCarryAndHalfCarryEnable, 0x29))
 }
 
 func Test8BitsArithmeticLogicalInstructions(t *testing.T) {
@@ -632,6 +635,66 @@ func testIncHlOverflow(t *testing.T, cpu *cpu) func() {
 
 		if cpu.registers.L != 0x00 {
 			t.Errorf("cpu.registers.L = %0#2X, expected = %0#2X", cpu.registers.L, 0x00)
+		}
+	}
+}
+
+func testAddHlHl(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F = zeroFlag | negativeFlag
+
+	cpu.registers.writeHL(0x0200)
+
+	return func() {
+		value := cpu.registers.readHL()
+		if value != 0x0400 {
+			t.Errorf("HL register value = %0#4X, expected = %0#4X", value, 0x0400)
+		}
+
+		if (cpu.registers.F & zeroFlag) != zeroFlag {
+			t.Error("Zero flag must be enabled")
+		}
+
+		if (cpu.registers.F & negativeFlag) == negativeFlag {
+			t.Error("Negative flag must be disabled")
+		}
+
+		if (cpu.registers.F & halfCarryFlag) == halfCarryFlag {
+			t.Error("Half carry flag must be disabled")
+		}
+
+		if (cpu.registers.F & carryFlag) == carryFlag {
+			t.Error("Carry flag must be disabled")
+		}
+	}
+}
+
+func testAddHlHlCarryAndHalfCarryEnable(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F = zeroFlag | negativeFlag
+
+	//   1100 1100 0000 0000
+	// + 1100 1100 0000 0000
+	cpu.registers.writeHL(0xCC00)
+
+	return func() {
+		value := cpu.registers.readHL()
+		if value != 0x9800 {
+			t.Errorf("HL register value = %0#4X, expected = %0#4X", value, 0x9800)
+		}
+
+		if (cpu.registers.F & zeroFlag) != zeroFlag {
+			t.Error("Zero flag must be enabled")
+		}
+
+		if (cpu.registers.F & negativeFlag) == negativeFlag {
+			t.Error("Negative flag must be disabled")
+		}
+
+		if (cpu.registers.F & halfCarryFlag) != halfCarryFlag {
+			t.Error("Half carry flag must be enabled")
+		}
+
+		if (cpu.registers.F & carryFlag) != carryFlag {
+			t.Error("Carry flag must be enabled")
 		}
 	}
 }

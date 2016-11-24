@@ -1639,8 +1639,8 @@ func testIncL(t *testing.T, cpu *cpu) func() {
 }
 
 func testIncLOverflowAndHalfCarry(t *testing.T, cpu *cpu) func() {
-	cpu.registers.L = negativeFlag | carryFlag
-	cpu.registers.H = 0xFF
+	cpu.registers.F = negativeFlag | carryFlag
+	cpu.registers.L = 0xFF
 
 	return func() {
 		if cpu.registers.L != 0x00 {

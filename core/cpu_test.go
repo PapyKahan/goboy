@@ -54,6 +54,9 @@ func Test16BitsArithmeticLogicalInstructions(t *testing.T) {
 
 	t.Run("ADD HL HL", instructionTestHandler(testAddHlHl, 0x29))
 	t.Run("ADD HL HL carry and half carry flags trigger", instructionTestHandler(testAddHlHlCarryAndHalfCarryEnable, 0x29))
+
+	t.Run("DEC HL", noFlagModificationInstructionTestHandler(testDecHl, 0x2B))
+	t.Run("DEC HL underflow", noFlagModificationInstructionTestHandler(testDecHlUnderflow, 0x2B))
 }
 
 func Test8BitsArithmeticLogicalInstructions(t *testing.T) {
@@ -712,6 +715,28 @@ func testAddHlHlCarryAndHalfCarryEnable(t *testing.T, cpu *cpu) func() {
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
 			t.Error("Carry flag must be enabled")
+		}
+	}
+}
+
+func testDecHl(t *testing.T, cpu *cpu) func() {
+	cpu.registers.writeHL(0x1)
+
+	return func() {
+		value := cpu.registers.readHL()
+		if value != 0x0 {
+			t.Errorf("cpu.registers.HL = %0#4X, expected = %0#4X", value, 0x0)
+		}
+	}
+}
+
+func testDecHlUnderflow(t *testing.T, cpu *cpu) func() {
+	cpu.registers.writeHL(0x0)
+
+	return func() {
+		value := cpu.registers.readHL()
+		if value != 0xFFFF {
+			t.Errorf("cpu.registers.HL = %0#4X, expected = %0#4X", value, 0xFFFF)
 		}
 	}
 }

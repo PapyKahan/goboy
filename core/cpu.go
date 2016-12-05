@@ -52,6 +52,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x2E: &instruction{name: "LD L n", actionTakenTicks: 8, length: 2, handler: ldLn},
 	0x2F: &instruction{name: "CPL", actionTakenTicks: 4, length: 1, handler: cpl},
 	0x30: &instruction{name: "JR NC n", actionTakenTicks: 12, actionNotTakenTicks: 8, length: 2, handler: jrNcn},
+	0x31: &instruction{name: "LD SP nn", actionTakenTicks: 12, length: 3, handler: ldSpNn},
 }
 
 type cpu struct {
@@ -592,4 +593,9 @@ func jrNcn(cpu *cpu, value uint16) bool {
 		return true
 	}
 	return false
+}
+
+func ldSpNn(cpu *cpu, value uint16) bool {
+	cpu.registers.sp = value
+	return true
 }

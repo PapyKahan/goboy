@@ -60,6 +60,9 @@ func Test16BitsArithmeticLogicalInstructions(t *testing.T) {
 
 	t.Run("DEC HL", noFlagModificationInstructionTestHandler(testDecHl, 0x2B))
 	t.Run("DEC HL underflow", noFlagModificationInstructionTestHandler(testDecHlUnderflow, 0x2B))
+
+	t.Run("INC SP", noFlagModificationInstructionTestHandler(testIncSp, 0x33))
+	t.Run("INC SP overflow", noFlagModificationInstructionTestHandler(testIncSpOverflow, 0x33))
 }
 
 func Test8BitsArithmeticLogicalInstructions(t *testing.T) {
@@ -792,6 +795,26 @@ func testDecHlUnderflow(t *testing.T, cpu *cpu) func() {
 		value := cpu.registers.readHL()
 		if value != 0xFFFF {
 			t.Errorf("cpu.registers.HL = %0#4X, expected = %0#4X", value, 0xFFFF)
+		}
+	}
+}
+
+func testIncSp(t *testing.T, cpu *cpu) func() {
+	cpu.registers.sp = 0x0101
+
+	return func() {
+		if cpu.registers.sp != 0x0102 {
+			t.Errorf("cpu.registers.sp = %0#4X, expected = %0#4X", cpu.registers.sp, 0x0102)
+		}
+	}
+}
+
+func testIncSpOverflow(t *testing.T, cpu *cpu) func() {
+	cpu.registers.sp = 0xFFFF
+
+	return func() {
+		if cpu.registers.sp != 0x00 {
+			t.Errorf("cpu.registers.sp = %0#4X, expected = %0#4X", cpu.registers.sp, 0x0000)
 		}
 	}
 }

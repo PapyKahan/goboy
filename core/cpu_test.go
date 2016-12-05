@@ -136,6 +136,10 @@ func TestJumpCalls(t *testing.T) {
 	t.Run("JR Z n", noFlagModificationInstructionTestHandler(testJrZn, 0x28))
 	t.Run("JR Z n zero flag disabled", noFlagModificationInstructionTestHandler(testJrZnZeroFlagDisabled, 0x28))
 	t.Run("JR Z n negative value", noFlagModificationInstructionTestHandler(testJrZnNegativeValue, 0x28))
+
+	t.Run("JR NC n", noFlagModificationInstructionTestHandler(testJrNcn, 0x30))
+	t.Run("JR NC n zero flag enabled", noFlagModificationInstructionTestHandler(testJrNcnCarryFlagEnabled, 0x30))
+	t.Run("JR NC n negative value", noFlagModificationInstructionTestHandler(testJrNcnNegativeValue, 0x30))
 }
 
 func instructionTestHandler(test instructionTestFunction, opcode byte) func(t *testing.T) {
@@ -2176,6 +2180,56 @@ func testJrZnNegativeValue(t *testing.T, cpu *cpu) func() {
 			t.Errorf("cpu.registers.pc = %0#4X, expected = %0#4X", cpu.registers.pc, 0xFFF3)
 		} else {
 			cpu.registers.pc += 15
+		}
+
+		if cpu.ticks != 12 {
+			t.Errorf("cpu.ticks = %d, expected = %d", cpu.ticks, 8)
+		}
+	}
+}
+
+func testJrNcn(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F &^= carryFlag
+	cpu.mmu.writeByte(romBank00BaseAddress+1, 0x8)
+
+	return func() {
+		if cpu.registers.pc != 0x000A {
+			t.Errorf("cpu.registers.pc = %0#4X, expected = %0#4X", cpu.registers.pc, 0x000A)
+		} else {
+			cpu.registers.F |= carryFlag
+			cpu.registers.pc -= 0x8
+		}
+		if cpu.ticks != 12 {
+			t.Errorf("cpu.ticks = %d, expected = %d", cpu.ticks, 12)
+		}
+	}
+}
+
+func testJrNcnCarryFlagEnabled(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F |= carryFlag
+	cpu.mmu.writeByte(romBank00BaseAddress+1, 0x8)
+
+	return func() {
+		if cpu.registers.pc != 0x0002 {
+			t.Errorf("cpu.registers.pc = %0#4X, expected = %0#4X", cpu.registers.pc, 0x0002)
+		}
+
+		if cpu.ticks != 8 {
+			t.Errorf("cpu.ticks = %d, expected = %d", cpu.ticks, 8)
+		}
+	}
+}
+
+func testJrNcnNegativeValue(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F &^= carryFlag
+	cpu.mmu.writeByte(romBank00BaseAddress+1, 0xF1) // -15
+
+	return func() {
+		if cpu.registers.pc != 0xFFF3 {
+			t.Errorf("cpu.registers.pc = %0#4X, expected = %0#4X", cpu.registers.pc, 0xFFF3)
+		} else {
+			cpu.registers.pc += 15
+			cpu.registers.F |= carryFlag
 		}
 
 		if cpu.ticks != 12 {

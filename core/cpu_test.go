@@ -1,8 +1,6 @@
 package core
 
-import (
-	"testing"
-)
+import "testing"
 
 type instructionTestFunction func(t *testing.T, cpu *cpu) func()
 
@@ -68,6 +66,9 @@ func Test16BitsArithmeticLogicalInstructions(t *testing.T) {
 
 	t.Run("ADD HL SP", instructionTestHandler(testAddHlSp, 0x39))
 	t.Run("ADD HL SP carry and half carry flags trigger", instructionTestHandler(testAddHlSpCarryAndHalfCarryEnable, 0x39))
+
+	t.Run("DEC SP", noFlagModificationInstructionTestHandler(testDecSp, 0x3B))
+	t.Run("DEC SP underflow", noFlagModificationInstructionTestHandler(testDecSpUnderflow, 0x3B))
 }
 
 func Test8BitsArithmeticLogicalInstructions(t *testing.T) {
@@ -922,6 +923,26 @@ func testAddHlSpCarryAndHalfCarryEnable(t *testing.T, cpu *cpu) func() {
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
 			t.Error("Carry flag must be enabled")
+		}
+	}
+}
+
+func testDecSp(t *testing.T, cpu *cpu) func() {
+	cpu.registers.sp = 0x0001
+
+	return func() {
+		if cpu.registers.sp != 0x0000 {
+			t.Errorf("cpu.registers.sp = %0#4X, expected = %0#4X", cpu.registers.sp, 0x0000)
+		}
+	}
+}
+
+func testDecSpUnderflow(t *testing.T, cpu *cpu) func() {
+	cpu.registers.sp = 0x0000
+
+	return func() {
+		if cpu.registers.sp != 0xFFFF {
+			t.Errorf("cpu.registers.sp = %0#4X, expected = %0#4X", cpu.registers.sp, 0xFFFF)
 		}
 	}
 }

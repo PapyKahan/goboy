@@ -59,6 +59,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x35: &instruction{name: "DEC (HL)", actionTakenTicks: 12, length: 1, handler: decHlp},
 	0x36: &instruction{name: "LD (HL), n", actionTakenTicks: 12, length: 2, handler: ldHlpn},
 	0x37: &instruction{name: "SCF", actionTakenTicks: 4, length: 1, handler: scf},
+	0x38: &instruction{name: "JR C n", actionTakenTicks: 12, actionNotTakenTicks: 8, length: 2, handler: jrCn},
 }
 
 type cpu struct {
@@ -508,7 +509,7 @@ func daa(cpu *cpu, _ uint16) bool {
 	correctionFactor := uint16(cpu.registers.A)
 
 	if cpu.registers.F&negativeFlag != negativeFlag {
-		if (cpu.registers.F&halfCarryFlag == halfCarryFlag) || (correctionFactor & 0x0F > 0x09) {
+		if (cpu.registers.F&halfCarryFlag == halfCarryFlag) || (correctionFactor&0x0F > 0x09) {
 			correctionFactor += 0x06
 		}
 
@@ -516,11 +517,11 @@ func daa(cpu *cpu, _ uint16) bool {
 			correctionFactor += 0x60
 		}
 	} else {
-		if (cpu.registers.F&halfCarryFlag == halfCarryFlag) {
-			correctionFactor = (correctionFactor - 0x06) & 0xFF 
+		if cpu.registers.F&halfCarryFlag == halfCarryFlag {
+			correctionFactor = (correctionFactor - 0x06) & 0xFF
 		}
 
-		if (cpu.registers.F&carryFlag == carryFlag) {
+		if cpu.registers.F&carryFlag == carryFlag {
 			correctionFactor -= 0x60
 		}
 	}
@@ -590,7 +591,7 @@ func ldLn(cpu *cpu, value uint16) bool {
 func cpl(cpu *cpu, value uint16) bool {
 	cpu.registers.A = cpu.registers.A ^ 0xFF
 	cpu.registers.F |= negativeFlag | halfCarryFlag
-	return true;
+	return true
 }
 
 func jrNcn(cpu *cpu, value uint16) bool {
@@ -635,7 +636,7 @@ func decHlp(cpu *cpu, _ uint16) bool {
 
 func ldHlpn(cpu *cpu, value uint16) bool {
 	address := cpu.registers.readHL()
-	cpu.mmu.writeByte(address, byte(value & 0x00FF))
+	cpu.mmu.writeByte(address, byte(value&0x00FF))
 	return true
 }
 
@@ -643,4 +644,12 @@ func scf(cpu *cpu, _ uint16) bool {
 	cpu.registers.F |= carryFlag
 	cpu.registers.F &^= negativeFlag | halfCarryFlag
 	return true
+}
+
+func jrCn(cpu *cpu, value uint16) bool {
+	if cpu.registers.F&carryFlag == carryFlag {
+		cpu.relativeJump(byte(value & 0x00FF))
+		return true
+	}
+	return false
 }

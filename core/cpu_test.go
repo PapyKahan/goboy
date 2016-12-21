@@ -154,6 +154,10 @@ func TestJumpCalls(t *testing.T) {
 	t.Run("JR NC n", noFlagModificationInstructionTestHandler(testJrNcn, 0x30))
 	t.Run("JR NC n zero flag enabled", noFlagModificationInstructionTestHandler(testJrNcnCarryFlagEnabled, 0x30))
 	t.Run("JR NC n negative value", noFlagModificationInstructionTestHandler(testJrNcnNegativeValue, 0x30))
+
+	t.Run("JR C n", noFlagModificationInstructionTestHandler(testJrCn, 0x38))
+	t.Run("JR C n carry flag disabled", noFlagModificationInstructionTestHandler(testJrCnCarryFlagDisabled, 0x38))
+	t.Run("JR C n negative value", noFlagModificationInstructionTestHandler(testJrCnNegativeValue, 0x38))
 }
 
 func instructionTestHandler(test instructionTestFunction, opcode byte) func(t *testing.T) {
@@ -429,8 +433,8 @@ func testLdAHlpIncHl(t *testing.T, cpu *cpu) func() {
 		}
 		hl := cpu.registers.readHL()
 		if hl != workRAMBank0BaseAddress+0x0001 {
-			t.Errorf("cpu.registers.HL = %0#4X, expected = %0#4X", hl, workRAMBank0BaseAddress + 0x0001)
-		} 
+			t.Errorf("cpu.registers.HL = %0#4X, expected = %0#4X", hl, workRAMBank0BaseAddress+0x0001)
+		}
 	}
 }
 
@@ -2472,6 +2476,56 @@ func testJrNcnNegativeValue(t *testing.T, cpu *cpu) func() {
 		} else {
 			cpu.registers.pc += 15
 			cpu.registers.F |= carryFlag
+		}
+
+		if cpu.ticks != 12 {
+			t.Errorf("cpu.ticks = %d, expected = %d", cpu.ticks, 8)
+		}
+	}
+}
+
+func testJrCn(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F |= carryFlag
+	cpu.mmu.writeByte(romBank00BaseAddress+1, 0x8)
+
+	return func() {
+		if cpu.registers.pc != 0x000A {
+			t.Errorf("cpu.registers.pc = %0#4X, expected = %0#4X", cpu.registers.pc, 0x000A)
+		} else {
+			cpu.registers.pc -= 0x8
+		}
+		if cpu.ticks != 12 {
+			t.Errorf("cpu.ticks = %d, expected = %d", cpu.ticks, 12)
+		}
+	}
+}
+
+func testJrCnCarryFlagDisabled(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F &^= carryFlag
+	cpu.mmu.writeByte(romBank00BaseAddress+1, 0x8)
+
+	return func() {
+		if cpu.registers.pc != 0x0002 {
+			t.Errorf("cpu.registers.pc = %0#4X, expected = %0#4X", cpu.registers.pc, 0x0002)
+		} else {
+			cpu.registers.F |= carryFlag
+		}
+
+		if cpu.ticks != 8 {
+			t.Errorf("cpu.ticks = %d, expected = %d", cpu.ticks, 8)
+		}
+	}
+}
+
+func testJrCnNegativeValue(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F |= carryFlag
+	cpu.mmu.writeByte(romBank00BaseAddress+1, 0xF1) // -15
+
+	return func() {
+		if cpu.registers.pc != 0xFFF3 {
+			t.Errorf("cpu.registers.pc = %0#4X, expected = %0#4X", cpu.registers.pc, 0xFFF3)
+		} else {
+			cpu.registers.pc += 15
 		}
 
 		if cpu.ticks != 12 {

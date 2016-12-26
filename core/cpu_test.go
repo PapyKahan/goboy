@@ -80,6 +80,12 @@ func TestLoadMoveStoreInstructions(t *testing.T) {
 	t.Run("LD L L", noFlagModificationInstructionTestHandler(testLdLl, 0x6D))
 	t.Run("LD L (HL)", noFlagModificationInstructionTestHandler(testLdLhlp, 0x6E))
 	t.Run("LD L A", noFlagModificationInstructionTestHandler(testLdLa, 0x6F))
+	t.Run("LD (HL) B", noFlagModificationInstructionTestHandler(testLdHlpB, 0x70))
+	t.Run("LD (HL) C", noFlagModificationInstructionTestHandler(testLdHlpC, 0x71))
+	t.Run("LD (HL) D", noFlagModificationInstructionTestHandler(testLdHlpD, 0x72))
+	t.Run("LD (HL) E", noFlagModificationInstructionTestHandler(testLdHlpE, 0x73))
+	t.Run("LD (HL) H", noFlagModificationInstructionTestHandler(testLdHlpH, 0x74))
+	t.Run("LD (HL) L", noFlagModificationInstructionTestHandler(testLdHlpL, 0x75))
 }
 
 func Test16BitsArithmeticLogicalInstructions(t *testing.T) {
@@ -1102,6 +1108,76 @@ func testLdLa(t *testing.T, cpu *cpu) func() {
 	return func() {
 		if cpu.registers.L != 0x06 {
 			t.Errorf("cpu.registers.L = %0#2X, expected = %0#2X", cpu.registers.L, 0x06)
+		}
+	}
+}
+
+func testLdHlpB(t *testing.T, cpu *cpu) func() {
+	cpu.registers.writeHL(workRAMBank0BaseAddress)
+	cpu.registers.B = 0x06
+
+	return func() {
+		value := cpu.mmu.readByte(workRAMBank0BaseAddress)
+		if value != 0x06 {
+			t.Errorf("cpu.mmu.memory[%0#4X] = %0#2X, expected = %0#2X", workRAMBank0BaseAddress, value, 0x06)
+		}
+	}
+}
+
+func testLdHlpC(t *testing.T, cpu *cpu) func() {
+	cpu.registers.writeHL(workRAMBank0BaseAddress)
+	cpu.registers.C = 0x06
+
+	return func() {
+		value := cpu.mmu.readByte(workRAMBank0BaseAddress)
+		if value != 0x06 {
+			t.Errorf("cpu.mmu.memory[%0#4X] = %0#2X, expected = %0#2X", workRAMBank0BaseAddress, value, 0x06)
+		}
+	}
+}
+
+func testLdHlpD(t *testing.T, cpu *cpu) func() {
+	cpu.registers.writeHL(workRAMBank0BaseAddress)
+	cpu.registers.D = 0x06
+
+	return func() {
+		value := cpu.mmu.readByte(workRAMBank0BaseAddress)
+		if value != 0x06 {
+			t.Errorf("cpu.mmu.memory[%0#4X] = %0#2X, expected = %0#2X", workRAMBank0BaseAddress, value, 0x06)
+		}
+	}
+}
+
+func testLdHlpE(t *testing.T, cpu *cpu) func() {
+	cpu.registers.writeHL(workRAMBank0BaseAddress)
+	cpu.registers.E = 0x06
+
+	return func() {
+		value := cpu.mmu.readByte(workRAMBank0BaseAddress)
+		if value != 0x06 {
+			t.Errorf("cpu.mmu.memory[%0#4X] = %0#2X, expected = %0#2X", workRAMBank0BaseAddress, value, 0x06)
+		}
+	}
+}
+
+func testLdHlpH(t *testing.T, cpu *cpu) func() {
+	cpu.registers.writeHL(workRAMBank0BaseAddress)
+
+	return func() {
+		value := cpu.mmu.readByte(workRAMBank0BaseAddress)
+		if value != 0xC0 {
+			t.Errorf("cpu.mmu.memory[%0#4X] = %0#2X, expected = %0#2X", workRAMBank0BaseAddress, value, 0xC0)
+		}
+	}
+}
+
+func testLdHlpL(t *testing.T, cpu *cpu) func() {
+	cpu.registers.writeHL(workRAMBank0BaseAddress + 0x06)
+
+	return func() {
+		value := cpu.mmu.readByte(workRAMBank0BaseAddress + 0x06)
+		if value != 0x06 {
+			t.Errorf("cpu.mmu.memory[%0#4X] = %0#2X, expected = %0#2X", workRAMBank0BaseAddress, value, 0x06)
 		}
 	}
 }

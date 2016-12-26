@@ -63,6 +63,8 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x39: &instruction{name: "ADD HL SP", actionTakenTicks: 8, length: 1, handler: addHlSp},
 	0x3A: &instruction{name: "LD A (HL-)", actionTakenTicks: 8, length: 1, handler: ldAHlpDecHl},
 	0x3B: &instruction{name: "DEC SP", actionTakenTicks: 8, length: 1, handler: decSp},
+	0x3C: &instruction{name: "INC A", actionTakenTicks: 4, length: 1, handler: incA},
+	0x3D: &instruction{name: "DEC A", actionTakenTicks: 4, length: 1, handler: decA},
 }
 
 type cpu struct {
@@ -673,5 +675,15 @@ func ldAHlpDecHl(cpu *cpu, _ uint16) bool {
 
 func decSp(cpu *cpu, _ uint16) bool {
 	cpu.registers.sp--
+	return true
+}
+
+func incA(cpu *cpu, _ uint16) bool {
+	cpu.registers.A = cpu.aluInc(cpu.registers.A)
+	return true
+}
+
+func decA(cpu *cpu, _ uint16) bool {
+	cpu.registers.A = cpu.aluDec(cpu.registers.A)
 	return true
 }

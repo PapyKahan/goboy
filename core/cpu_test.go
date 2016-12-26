@@ -133,6 +133,9 @@ func Test8BitsArithmeticLogicalInstructions(t *testing.T) {
 	t.Run("DEC A", instructionTestHandler(testDecA, 0x3D))
 	t.Run("DEC A zero flag", instructionTestHandler(testDecAZeroFlag, 0x3D))
 	t.Run("DEC A underflow", instructionTestHandler(testDecAUnderflow, 0x3D))
+
+	t.Run("CCF carry flag disabled", instructionTestHandler(testCcfDisabledCarryFlag, 0x3F))
+	t.Run("CCF carry flag enabled", instructionTestHandler(testCcfEnabledCarryFlag, 0x3F))
 }
 
 func Test8bitRotationsshiftsAndBitInstructions(t *testing.T) {
@@ -2292,6 +2295,50 @@ func testDecAUnderflow(t *testing.T, cpu *cpu) func() {
 
 		if (cpu.registers.F & carryFlag) != carryFlag {
 			t.Errorf("Carry flag must be enabled")
+		}
+	}
+}
+
+func testCcfDisabledCarryFlag(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F = zeroFlag | negativeFlag | halfCarryFlag
+
+	return func() {
+		if (cpu.registers.F & zeroFlag) != zeroFlag {
+			t.Error("Zero flag must be enabled")
+		}
+
+		if (cpu.registers.F & negativeFlag) == negativeFlag {
+			t.Error("Negative flag must be disabled")
+		}
+
+		if (cpu.registers.F & halfCarryFlag) == halfCarryFlag {
+			t.Error("Half carry flag must be disabled")
+		}
+
+		if (cpu.registers.F & carryFlag) != carryFlag {
+			t.Errorf("Carry flag must be enabled")
+		}
+	}
+}
+
+func testCcfEnabledCarryFlag(t *testing.T, cpu *cpu) func() {
+	cpu.registers.F = zeroFlag | negativeFlag | halfCarryFlag | carryFlag
+
+	return func() {
+		if (cpu.registers.F & zeroFlag) != zeroFlag {
+			t.Error("Zero flag must be enabled")
+		}
+
+		if (cpu.registers.F & negativeFlag) == negativeFlag {
+			t.Error("Negative flag must be disabled")
+		}
+
+		if (cpu.registers.F & halfCarryFlag) == halfCarryFlag {
+			t.Error("Half carry flag must be disabled")
+		}
+
+		if (cpu.registers.F & carryFlag) == carryFlag {
+			t.Errorf("Carry flag must be disabled")
 		}
 	}
 }

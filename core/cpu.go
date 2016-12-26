@@ -66,6 +66,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x3C: &instruction{name: "INC A", actionTakenTicks: 4, length: 1, handler: incA},
 	0x3D: &instruction{name: "DEC A", actionTakenTicks: 4, length: 1, handler: decA},
 	0x3E: &instruction{name: "LD A n", actionTakenTicks: 8, length: 2, handler: ldAn},
+	0x3F: &instruction{name: "CCF", actionTakenTicks: 4, length: 1, handler: ccf},
 }
 
 type cpu struct {
@@ -691,5 +692,15 @@ func decA(cpu *cpu, _ uint16) bool {
 
 func ldAn(cpu *cpu, value uint16) bool {
 	cpu.registers.A = byte(value & 0x00FF)
+	return true
+}
+
+func ccf(cpu *cpu, value uint16) bool {
+	if (cpu.registers.F & carryFlag) == carryFlag {
+		cpu.registers.F &^= carryFlag
+	} else {
+		cpu.registers.F |= carryFlag
+	}
+	cpu.registers.F &^= negativeFlag | halfCarryFlag
 	return true
 }

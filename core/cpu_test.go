@@ -64,6 +64,22 @@ func TestLoadMoveStoreInstructions(t *testing.T) {
 	t.Run("LD E L", noFlagModificationInstructionTestHandler(testLdEl, 0x5D))
 	t.Run("LD E (HL)", noFlagModificationInstructionTestHandler(testLdEhlp, 0x5E))
 	t.Run("LD E A", noFlagModificationInstructionTestHandler(testLdEa, 0x5F))
+	t.Run("LD H B", noFlagModificationInstructionTestHandler(testLdHb, 0x60))
+	t.Run("LD H C", noFlagModificationInstructionTestHandler(testLdHc, 0x61))
+	t.Run("LD H D", noFlagModificationInstructionTestHandler(testLdHd, 0x62))
+	t.Run("LD H E", noFlagModificationInstructionTestHandler(testLdHe, 0x63))
+	t.Run("LD H H", noFlagModificationInstructionTestHandler(testLdHh, 0x64))
+	t.Run("LD H L", noFlagModificationInstructionTestHandler(testLdHl, 0x65))
+	t.Run("LD H (HL)", noFlagModificationInstructionTestHandler(testLdHhlp, 0x66))
+	t.Run("LD H A", noFlagModificationInstructionTestHandler(testLdHa, 0x67))
+	t.Run("LD L B", noFlagModificationInstructionTestHandler(testLdLb, 0x68))
+	t.Run("LD L C", noFlagModificationInstructionTestHandler(testLdLc, 0x69))
+	t.Run("LD L D", noFlagModificationInstructionTestHandler(testLdLd, 0x6A))
+	t.Run("LD L E", noFlagModificationInstructionTestHandler(testLdLe, 0x6B))
+	t.Run("LD L H", noFlagModificationInstructionTestHandler(testLdLh, 0x6C))
+	t.Run("LD L L", noFlagModificationInstructionTestHandler(testLdLl, 0x6D))
+	t.Run("LD L (HL)", noFlagModificationInstructionTestHandler(testLdLhlp, 0x6E))
+	t.Run("LD L A", noFlagModificationInstructionTestHandler(testLdLa, 0x6F))
 }
 
 func Test16BitsArithmeticLogicalInstructions(t *testing.T) {
@@ -912,6 +928,180 @@ func testLdEa(t *testing.T, cpu *cpu) func() {
 	return func() {
 		if cpu.registers.E != 0x06 {
 			t.Errorf("cpu.registers.E = %0#2X, expected = %0#2X", cpu.registers.E, 0x06)
+		}
+	}
+}
+
+func testLdHb(t *testing.T, cpu *cpu) func() {
+	cpu.registers.H = 0x00
+	cpu.registers.B = 0x06
+
+	return func() {
+		if cpu.registers.H != 0x06 {
+			t.Errorf("cpu.registers.H = %0#2X, expected = %0#2X", cpu.registers.H, 0x06)
+		}
+	}
+}
+
+func testLdHc(t *testing.T, cpu *cpu) func() {
+	cpu.registers.H = 0x00
+	cpu.registers.C = 0x06
+
+	return func() {
+		if cpu.registers.H != 0x06 {
+			t.Errorf("cpu.registers.H = %0#2X, expected = %0#2X", cpu.registers.H, 0x06)
+		}
+	}
+}
+
+func testLdHd(t *testing.T, cpu *cpu) func() {
+	cpu.registers.H = 0x00
+	cpu.registers.D = 0x06
+
+	return func() {
+		if cpu.registers.H != 0x06 {
+			t.Errorf("cpu.registers.H = %0#2X, expected = %0#2X", cpu.registers.H, 0x06)
+		}
+	}
+}
+
+func testLdHe(t *testing.T, cpu *cpu) func() {
+	cpu.registers.H = 0x00
+	cpu.registers.E = 0x06
+
+	return func() {
+		if cpu.registers.H != 0x06 {
+			t.Errorf("cpu.registers.H = %0#2X, expected = %0#2X", cpu.registers.H, 0x06)
+		}
+	}
+}
+
+func testLdHh(t *testing.T, cpu *cpu) func() {
+	cpu.registers.H = 0x06
+
+	return func() {
+		if cpu.registers.H != 0x06 {
+			t.Errorf("cpu.registers.H = %0#2X, expected = %0#2X", cpu.registers.H, 0x06)
+		}
+	}
+}
+
+func testLdHl(t *testing.T, cpu *cpu) func() {
+	cpu.registers.H = 0x00
+	cpu.registers.L = 0x06
+
+	return func() {
+		if cpu.registers.H != 0x06 {
+			t.Errorf("cpu.registers.H = %0#2X, expected = %0#2X", cpu.registers.H, 0x06)
+		}
+	}
+}
+
+func testLdHhlp(t *testing.T, cpu *cpu) func() {
+	cpu.registers.writeHL(workRAMBank0BaseAddress)
+	cpu.mmu.writeByte(workRAMBank0BaseAddress, 0x06)
+
+	return func() {
+		if cpu.registers.H != 0x06 {
+			t.Errorf("cpu.registers.H = %0#2X, expected = %0#2X", cpu.registers.H, 0x06)
+		}
+	}
+}
+
+func testLdHa(t *testing.T, cpu *cpu) func() {
+	cpu.registers.H = 0x00
+	cpu.registers.A = 0x06
+
+	return func() {
+		if cpu.registers.H != 0x06 {
+			t.Errorf("cpu.registers.H = %0#2X, expected = %0#2X", cpu.registers.H, 0x06)
+		}
+	}
+}
+
+func testLdLb(t *testing.T, cpu *cpu) func() {
+	cpu.registers.L = 0x00
+	cpu.registers.B = 0x06
+
+	return func() {
+		if cpu.registers.L != 0x06 {
+			t.Errorf("cpu.registers.L = %0#2X, expected = %0#2X", cpu.registers.L, 0x06)
+		}
+	}
+}
+
+func testLdLc(t *testing.T, cpu *cpu) func() {
+	cpu.registers.L = 0x00
+	cpu.registers.C = 0x06
+
+	return func() {
+		if cpu.registers.L != 0x06 {
+			t.Errorf("cpu.registers.L = %0#2X, expected = %0#2X", cpu.registers.L, 0x06)
+		}
+	}
+}
+
+func testLdLd(t *testing.T, cpu *cpu) func() {
+	cpu.registers.L = 0x00
+	cpu.registers.D = 0x06
+
+	return func() {
+		if cpu.registers.L != 0x06 {
+			t.Errorf("cpu.registers.L = %0#2X, expected = %0#2X", cpu.registers.L, 0x06)
+		}
+	}
+}
+
+func testLdLe(t *testing.T, cpu *cpu) func() {
+	cpu.registers.L = 0x06
+	cpu.registers.E = 0x06
+
+	return func() {
+		if cpu.registers.L != 0x06 {
+			t.Errorf("cpu.registers.L = %0#2X, expected = %0#2X", cpu.registers.L, 0x06)
+		}
+	}
+}
+
+func testLdLh(t *testing.T, cpu *cpu) func() {
+	cpu.registers.L = 0x00
+	cpu.registers.H = 0x06
+
+	return func() {
+		if cpu.registers.L != 0x06 {
+			t.Errorf("cpu.registers.L = %0#2X, expected = %0#2X", cpu.registers.L, 0x06)
+		}
+	}
+}
+
+func testLdLl(t *testing.T, cpu *cpu) func() {
+	cpu.registers.L = 0x06
+
+	return func() {
+		if cpu.registers.L != 0x06 {
+			t.Errorf("cpu.registers.L = %0#2X, expected = %0#2X", cpu.registers.L, 0x06)
+		}
+	}
+}
+
+func testLdLhlp(t *testing.T, cpu *cpu) func() {
+	cpu.registers.writeHL(workRAMBank0BaseAddress)
+	cpu.mmu.writeByte(workRAMBank0BaseAddress, 0x06)
+
+	return func() {
+		if cpu.registers.L != 0x06 {
+			t.Errorf("cpu.registers.L = %0#2X, expected = %0#2X", cpu.registers.L, 0x06)
+		}
+	}
+}
+
+func testLdLa(t *testing.T, cpu *cpu) func() {
+	cpu.registers.L = 0x00
+	cpu.registers.A = 0x06
+
+	return func() {
+		if cpu.registers.L != 0x06 {
+			t.Errorf("cpu.registers.L = %0#2X, expected = %0#2X", cpu.registers.L, 0x06)
 		}
 	}
 }

@@ -83,6 +83,22 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x4D: &instruction{name: "LD C L", actionTakenTicks: 4, length: 1, handler: ldCl},
 	0x4E: &instruction{name: "LD C (HL)", actionTakenTicks: 4, length: 1, handler: ldChlp},
 	0x4F: &instruction{name: "LD C A", actionTakenTicks: 4, length: 1, handler: ldCa},
+	0x50: &instruction{name: "LD D B", actionTakenTicks: 4, length: 1, handler: ldDb},
+	0x51: &instruction{name: "LD D C", actionTakenTicks: 4, length: 1, handler: ldDc},
+	0x52: &instruction{name: "LD D D", actionTakenTicks: 4, length: 1, handler: ldDd},
+	0x53: &instruction{name: "LD D E", actionTakenTicks: 4, length: 1, handler: ldDe},
+	0x54: &instruction{name: "LD D H", actionTakenTicks: 4, length: 1, handler: ldDh},
+	0x55: &instruction{name: "LD D L", actionTakenTicks: 4, length: 1, handler: ldDl},
+	0x56: &instruction{name: "LD D (HL)", actionTakenTicks: 4, length: 1, handler: ldDhlp},
+	0x57: &instruction{name: "LD D A", actionTakenTicks: 4, length: 1, handler: ldDa},
+	0x58: &instruction{name: "LD E B", actionTakenTicks: 4, length: 1, handler: ldEb},
+	0x59: &instruction{name: "LD E C", actionTakenTicks: 4, length: 1, handler: ldEc},
+	0x5A: &instruction{name: "LD E D", actionTakenTicks: 4, length: 1, handler: ldEd},
+	0x5B: &instruction{name: "LD E E", actionTakenTicks: 4, length: 1, handler: ldEe},
+	0x5C: &instruction{name: "LD E H", actionTakenTicks: 4, length: 1, handler: ldEh},
+	0x5D: &instruction{name: "LD E L", actionTakenTicks: 4, length: 1, handler: ldEl},
+	0x5E: &instruction{name: "LD E (HL)", actionTakenTicks: 4, length: 1, handler: ldEhlp},
+	0x5F: &instruction{name: "LD E A", actionTakenTicks: 4, length: 1, handler: ldEa},
 }
 
 type cpu struct {
@@ -796,5 +812,83 @@ func ldChlp(cpu *cpu, value uint16) bool {
 
 func ldCa(cpu *cpu, value uint16) bool {
 	cpu.registers.C = cpu.registers.A
+	return true
+}
+
+func ldDb(cpu *cpu, value uint16) bool {
+	cpu.registers.D = cpu.registers.B
+	return true
+}
+
+func ldDc(cpu *cpu, value uint16) bool {
+	cpu.registers.D = cpu.registers.C
+	return true
+}
+
+func ldDd(cpu *cpu, value uint16) bool {
+	return true
+}
+
+func ldDe(cpu *cpu, value uint16) bool {
+	cpu.registers.D = cpu.registers.E
+	return true
+}
+
+func ldDh(cpu *cpu, value uint16) bool {
+	cpu.registers.D = cpu.registers.H
+	return true
+}
+
+func ldDl(cpu *cpu, value uint16) bool {
+	cpu.registers.D = cpu.registers.L
+	return true
+}
+
+func ldDhlp(cpu *cpu, value uint16) bool {
+	cpu.registers.D = cpu.mmu.readByte(cpu.registers.readHL())
+	return true
+}
+
+func ldDa(cpu *cpu, value uint16) bool {
+	cpu.registers.D = cpu.registers.A
+	return true
+}
+
+func ldEb(cpu *cpu, value uint16) bool {
+	cpu.registers.E = cpu.registers.B
+	return true
+}
+
+func ldEc(cpu *cpu, value uint16) bool {
+	cpu.registers.E = cpu.registers.C
+	return true
+}
+
+func ldEd(cpu *cpu, value uint16) bool {
+	cpu.registers.E = cpu.registers.D
+	return true
+}
+
+func ldEe(cpu *cpu, value uint16) bool {
+	return true
+}
+
+func ldEh(cpu *cpu, value uint16) bool {
+	cpu.registers.E = cpu.registers.H
+	return true
+}
+
+func ldEl(cpu *cpu, value uint16) bool {
+	cpu.registers.E = cpu.registers.L
+	return true
+}
+
+func ldEhlp(cpu *cpu, value uint16) bool {
+	cpu.registers.E = cpu.mmu.readByte(cpu.registers.readHL())
+	return true
+}
+
+func ldEa(cpu *cpu, value uint16) bool {
+	cpu.registers.E = cpu.registers.A
 	return true
 }

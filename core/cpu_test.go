@@ -8,6 +8,7 @@ func TestMiscControlInstructions(t *testing.T) {
 	t.Run("NOP", noFlagModificationInstructionTestHandler(testNop, 0x00))
 	t.Run("STOP", noFlagModificationInstructionTestHandler(testStop, 0x10))
 	t.Run("STOP folowed by another instruction", noFlagModificationInstructionTestHandler(testStopIncBc, 0x10))
+	t.Run("HALT", noFlagModificationInstructionTestHandler(testHalt, 0x76))
 }
 
 func TestLoadMoveStoreInstructions(t *testing.T) {
@@ -307,6 +308,14 @@ func testStopIncBc(t *testing.T, cpu *cpu) func() {
 
 		if cpu.registers.pc != previousProgramCounter {
 			t.Errorf("Cpu is stoped program counter must not be incremented, program counter value = %d", cpu.registers.pc)
+		}
+	}
+}
+
+func testHalt(t *testing.T, cpu *cpu) func() {
+	return func() {
+		if !cpu.halt {
+			t.Error("Cpu must be halt")
 		}
 	}
 }

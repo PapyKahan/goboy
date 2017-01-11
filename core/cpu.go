@@ -121,12 +121,14 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x73: &instruction{name: "LD (HL) E", actionTakenTicks: 8, length: 1, handler: ldHlpE},
 	0x74: &instruction{name: "LD (HL) H", actionTakenTicks: 8, length: 1, handler: ldHlpH},
 	0x75: &instruction{name: "LD (HL) L", actionTakenTicks: 8, length: 1, handler: ldHlpL},
+	0x76: &instruction{name: "HALT", actionTakenTicks: 4, length: 1, handler: halt},
 }
 
 type cpu struct {
 	registers      registers
 	ticks          uint64
 	stoped         bool
+	halt           bool
 	instructionSet *map[int]*instruction
 
 	// Processing units
@@ -142,6 +144,7 @@ func (cpu *cpu) initialize() {
 	cpu.spu = &spu{}
 
 	cpu.stoped = false
+	cpu.halt = false
 }
 
 func (cpu *cpu) initializeInstructionset() error {
@@ -1022,5 +1025,10 @@ func ldHlpH(cpu *cpu, value uint16) bool {
 
 func ldHlpL(cpu *cpu, value uint16) bool {
 	cpu.mmu.writeByte(cpu.registers.readHL(), cpu.registers.L)
+	return true
+}
+
+func halt(cpu *cpu, value uint16) bool {
+	cpu.halt = true
 	return true
 }

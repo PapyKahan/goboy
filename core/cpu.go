@@ -73,7 +73,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x43: &instruction{name: "LD B E", actionTakenTicks: 4, length: 1, handler: ldBe},
 	0x44: &instruction{name: "LD B H", actionTakenTicks: 4, length: 1, handler: ldBh},
 	0x45: &instruction{name: "LD B L", actionTakenTicks: 4, length: 1, handler: ldBl},
-	0x46: &instruction{name: "LD B (HL)", actionTakenTicks: 4, length: 1, handler: ldBhlp},
+	0x46: &instruction{name: "LD B (HL)", actionTakenTicks: 8, length: 1, handler: ldBhlp},
 	0x47: &instruction{name: "LD B A", actionTakenTicks: 4, length: 1, handler: ldBa},
 	0x48: &instruction{name: "LD C B", actionTakenTicks: 4, length: 1, handler: ldCb},
 	0x49: &instruction{name: "LD C C", actionTakenTicks: 4, length: 1, handler: ldCc},
@@ -81,7 +81,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x4B: &instruction{name: "LD C E", actionTakenTicks: 4, length: 1, handler: ldCe},
 	0x4C: &instruction{name: "LD C H", actionTakenTicks: 4, length: 1, handler: ldCh},
 	0x4D: &instruction{name: "LD C L", actionTakenTicks: 4, length: 1, handler: ldCl},
-	0x4E: &instruction{name: "LD C (HL)", actionTakenTicks: 4, length: 1, handler: ldChlp},
+	0x4E: &instruction{name: "LD C (HL)", actionTakenTicks: 8, length: 1, handler: ldChlp},
 	0x4F: &instruction{name: "LD C A", actionTakenTicks: 4, length: 1, handler: ldCa},
 	0x50: &instruction{name: "LD D B", actionTakenTicks: 4, length: 1, handler: ldDb},
 	0x51: &instruction{name: "LD D C", actionTakenTicks: 4, length: 1, handler: ldDc},
@@ -89,7 +89,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x53: &instruction{name: "LD D E", actionTakenTicks: 4, length: 1, handler: ldDe},
 	0x54: &instruction{name: "LD D H", actionTakenTicks: 4, length: 1, handler: ldDh},
 	0x55: &instruction{name: "LD D L", actionTakenTicks: 4, length: 1, handler: ldDl},
-	0x56: &instruction{name: "LD D (HL)", actionTakenTicks: 4, length: 1, handler: ldDhlp},
+	0x56: &instruction{name: "LD D (HL)", actionTakenTicks: 8, length: 1, handler: ldDhlp},
 	0x57: &instruction{name: "LD D A", actionTakenTicks: 4, length: 1, handler: ldDa},
 	0x58: &instruction{name: "LD E B", actionTakenTicks: 4, length: 1, handler: ldEb},
 	0x59: &instruction{name: "LD E C", actionTakenTicks: 4, length: 1, handler: ldEc},
@@ -97,7 +97,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x5B: &instruction{name: "LD E E", actionTakenTicks: 4, length: 1, handler: ldEe},
 	0x5C: &instruction{name: "LD E H", actionTakenTicks: 4, length: 1, handler: ldEh},
 	0x5D: &instruction{name: "LD E L", actionTakenTicks: 4, length: 1, handler: ldEl},
-	0x5E: &instruction{name: "LD E (HL)", actionTakenTicks: 4, length: 1, handler: ldEhlp},
+	0x5E: &instruction{name: "LD E (HL)", actionTakenTicks: 8, length: 1, handler: ldEhlp},
 	0x5F: &instruction{name: "LD E A", actionTakenTicks: 4, length: 1, handler: ldEa},
 	0x60: &instruction{name: "LD H B", actionTakenTicks: 4, length: 1, handler: ldHb},
 	0x61: &instruction{name: "LD H C", actionTakenTicks: 4, length: 1, handler: ldHc},
@@ -105,7 +105,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x63: &instruction{name: "LD H E", actionTakenTicks: 4, length: 1, handler: ldHe},
 	0x64: &instruction{name: "LD H H", actionTakenTicks: 4, length: 1, handler: ldHh},
 	0x65: &instruction{name: "LD H L", actionTakenTicks: 4, length: 1, handler: ldHl},
-	0x66: &instruction{name: "LD H (HL)", actionTakenTicks: 4, length: 1, handler: ldHhlp},
+	0x66: &instruction{name: "LD H (HL)", actionTakenTicks: 8, length: 1, handler: ldHhlp},
 	0x67: &instruction{name: "LD H A", actionTakenTicks: 4, length: 1, handler: ldHa},
 	0x68: &instruction{name: "LD L B", actionTakenTicks: 4, length: 1, handler: ldLb},
 	0x69: &instruction{name: "LD L C", actionTakenTicks: 4, length: 1, handler: ldLc},
@@ -113,14 +113,31 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x6B: &instruction{name: "LD L E", actionTakenTicks: 4, length: 1, handler: ldLe},
 	0x6C: &instruction{name: "LD L H", actionTakenTicks: 4, length: 1, handler: ldLh},
 	0x6D: &instruction{name: "LD L L", actionTakenTicks: 4, length: 1, handler: ldLl},
-	0x6E: &instruction{name: "LD L (HL)", actionTakenTicks: 4, length: 1, handler: ldLhlp},
+	0x6E: &instruction{name: "LD L (HL)", actionTakenTicks: 8, length: 1, handler: ldLhlp},
 	0x6F: &instruction{name: "LD L A", actionTakenTicks: 4, length: 1, handler: ldLa},
+	0x70: &instruction{name: "LD (HL) B", actionTakenTicks: 8, length: 1, handler: ldHlpB},
+	0x71: &instruction{name: "LD (HL) C", actionTakenTicks: 8, length: 1, handler: ldHlpC},
+	0x72: &instruction{name: "LD (HL) D", actionTakenTicks: 8, length: 1, handler: ldHlpD},
+	0x73: &instruction{name: "LD (HL) E", actionTakenTicks: 8, length: 1, handler: ldHlpE},
+	0x74: &instruction{name: "LD (HL) H", actionTakenTicks: 8, length: 1, handler: ldHlpH},
+	0x75: &instruction{name: "LD (HL) L", actionTakenTicks: 8, length: 1, handler: ldHlpL},
+	0x76: &instruction{name: "HALT", actionTakenTicks: 4, length: 1, handler: halt},
+	0x77: &instruction{name: "LD (HL) A", actionTakenTicks: 8, length: 1, handler: ldHlpA},
+	0x78: &instruction{name: "LD A B", actionTakenTicks: 4, length: 1, handler: ldAb},
+	0x79: &instruction{name: "LD A C", actionTakenTicks: 4, length: 1, handler: ldAc},
+	0x7A: &instruction{name: "LD A D", actionTakenTicks: 4, length: 1, handler: ldAd},
+	0x7B: &instruction{name: "LD A E", actionTakenTicks: 4, length: 1, handler: ldAe},
+	0x7C: &instruction{name: "LD A H", actionTakenTicks: 4, length: 1, handler: ldAh},
+	0x7D: &instruction{name: "LD A L", actionTakenTicks: 4, length: 1, handler: ldAl},
+	0x7E: &instruction{name: "LD A (HL)", actionTakenTicks: 8, length: 1, handler: ldAhlp},
+	0x7F: &instruction{name: "LD A A", actionTakenTicks: 4, length: 1, handler: ldAa},
 }
 
 type cpu struct {
 	registers      registers
 	ticks          uint64
 	stoped         bool
+	halt           bool
 	instructionSet *map[int]*instruction
 
 	// Processing units
@@ -136,6 +153,7 @@ func (cpu *cpu) initialize() {
 	cpu.spu = &spu{}
 
 	cpu.stoped = false
+	cpu.halt = false
 }
 
 func (cpu *cpu) initializeInstructionset() error {
@@ -986,5 +1004,84 @@ func ldLhlp(cpu *cpu, value uint16) bool {
 
 func ldLa(cpu *cpu, value uint16) bool {
 	cpu.registers.L = cpu.registers.A
+	return true
+}
+
+func ldHlpB(cpu *cpu, value uint16) bool {
+	cpu.mmu.writeByte(cpu.registers.readHL(), cpu.registers.B)
+	return true
+}
+
+func ldHlpC(cpu *cpu, value uint16) bool {
+	cpu.mmu.writeByte(cpu.registers.readHL(), cpu.registers.C)
+	return true
+}
+
+func ldHlpD(cpu *cpu, value uint16) bool {
+	cpu.mmu.writeByte(cpu.registers.readHL(), cpu.registers.D)
+	return true
+}
+
+func ldHlpE(cpu *cpu, value uint16) bool {
+	cpu.mmu.writeByte(cpu.registers.readHL(), cpu.registers.E)
+	return true
+}
+
+func ldHlpH(cpu *cpu, value uint16) bool {
+	cpu.mmu.writeByte(cpu.registers.readHL(), cpu.registers.H)
+	return true
+}
+
+func ldHlpL(cpu *cpu, value uint16) bool {
+	cpu.mmu.writeByte(cpu.registers.readHL(), cpu.registers.L)
+	return true
+}
+
+func halt(cpu *cpu, value uint16) bool {
+	cpu.halt = true
+	return true
+}
+
+func ldHlpA(cpu *cpu, value uint16) bool {
+	cpu.mmu.writeByte(cpu.registers.readHL(), cpu.registers.A)
+	return true
+}
+
+func ldAb(cpu *cpu, value uint16) bool {
+	cpu.registers.A = cpu.registers.B
+	return true
+}
+
+func ldAc(cpu *cpu, value uint16) bool {
+	cpu.registers.A = cpu.registers.C
+	return true
+}
+
+func ldAd(cpu *cpu, value uint16) bool {
+	cpu.registers.A = cpu.registers.D
+	return true
+}
+
+func ldAe(cpu *cpu, value uint16) bool {
+	cpu.registers.A = cpu.registers.E
+	return true
+}
+
+func ldAh(cpu *cpu, value uint16) bool {
+	cpu.registers.A = cpu.registers.H
+	return true
+}
+
+func ldAl(cpu *cpu, value uint16) bool {
+	cpu.registers.A = cpu.registers.L
+	return true
+}
+
+func ldAhlp(cpu *cpu, value uint16) bool {
+	cpu.registers.A = cpu.mmu.readByte(cpu.registers.readHL())
+	return true
+}
+
+func ldAa(cpu *cpu, value uint16) bool {
 	return true
 }

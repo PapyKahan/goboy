@@ -123,6 +123,14 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x75: &instruction{name: "LD (HL) L", actionTakenTicks: 8, length: 1, handler: ldHlpL},
 	0x76: &instruction{name: "HALT", actionTakenTicks: 4, length: 1, handler: halt},
 	0x77: &instruction{name: "LD (HL) A", actionTakenTicks: 8, length: 1, handler: ldHlpA},
+	0x78: &instruction{name: "LD A B", actionTakenTicks: 4, length: 1, handler: ldAb},
+	0x79: &instruction{name: "LD A C", actionTakenTicks: 4, length: 1, handler: ldAc},
+	0x7A: &instruction{name: "LD A D", actionTakenTicks: 4, length: 1, handler: ldAd},
+	0x7B: &instruction{name: "LD A E", actionTakenTicks: 4, length: 1, handler: ldAe},
+	0x7C: &instruction{name: "LD A H", actionTakenTicks: 4, length: 1, handler: ldAh},
+	0x7D: &instruction{name: "LD A L", actionTakenTicks: 4, length: 1, handler: ldAl},
+	0x7E: &instruction{name: "LD A (HL)", actionTakenTicks: 8, length: 1, handler: ldAhlp},
+	0x7F: &instruction{name: "LD A A", actionTakenTicks: 4, length: 1, handler: ldAa},
 }
 
 type cpu struct {
@@ -1036,5 +1044,44 @@ func halt(cpu *cpu, value uint16) bool {
 
 func ldHlpA(cpu *cpu, value uint16) bool {
 	cpu.mmu.writeByte(cpu.registers.readHL(), cpu.registers.A)
+	return true
+}
+
+func ldAb(cpu *cpu, value uint16) bool {
+	cpu.registers.A = cpu.registers.B
+	return true
+}
+
+func ldAc(cpu *cpu, value uint16) bool {
+	cpu.registers.A = cpu.registers.C
+	return true
+}
+
+func ldAd(cpu *cpu, value uint16) bool {
+	cpu.registers.A = cpu.registers.D
+	return true
+}
+
+func ldAe(cpu *cpu, value uint16) bool {
+	cpu.registers.A = cpu.registers.E
+	return true
+}
+
+func ldAh(cpu *cpu, value uint16) bool {
+	cpu.registers.A = cpu.registers.H
+	return true
+}
+
+func ldAl(cpu *cpu, value uint16) bool {
+	cpu.registers.A = cpu.registers.L
+	return true
+}
+
+func ldAhlp(cpu *cpu, value uint16) bool {
+	cpu.registers.A = cpu.mmu.readByte(cpu.registers.readHL())
+	return true
+}
+
+func ldAa(cpu *cpu, value uint16) bool {
 	return true
 }

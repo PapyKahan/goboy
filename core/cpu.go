@@ -122,6 +122,7 @@ var instructionSetDeclaration = map[int]*instruction{
 	0x74: &instruction{name: "LD (HL) H", actionTakenTicks: 8, length: 1, handler: ldHlpH},
 	0x75: &instruction{name: "LD (HL) L", actionTakenTicks: 8, length: 1, handler: ldHlpL},
 	0x76: &instruction{name: "HALT", actionTakenTicks: 4, length: 1, handler: halt},
+	0x77: &instruction{name: "LD (HL) A", actionTakenTicks: 8, length: 1, handler: ldHlpA},
 }
 
 type cpu struct {
@@ -1030,5 +1031,10 @@ func ldHlpL(cpu *cpu, value uint16) bool {
 
 func halt(cpu *cpu, value uint16) bool {
 	cpu.halt = true
+	return true
+}
+
+func ldHlpA(cpu *cpu, value uint16) bool {
+	cpu.mmu.writeByte(cpu.registers.readHL(), cpu.registers.A)
 	return true
 }
